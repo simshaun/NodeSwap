@@ -7,11 +7,7 @@ namespace NVM
     {
         public static Version Parse(string rawVersion)
         {
-            if (rawVersion[0].ToString().ToLower() == "v")
-            {
-                rawVersion = rawVersion[1..];
-            }
-
+            rawVersion = CleanRawVersion(rawVersion);
             var version = FloatRange.Parse(rawVersion);
             if (version is null)
             {
@@ -23,11 +19,7 @@ namespace NVM
 
         public static Version StrictParse(string rawVersion)
         {
-            if (rawVersion[0].ToString().ToLower() == "v")
-            {
-                rawVersion = rawVersion[1..];
-            }
-
+            rawVersion = CleanRawVersion(rawVersion);
             try
             {
                 return new Version(rawVersion);
@@ -36,6 +28,16 @@ namespace NVM
             {
                 throw new ArgumentException($"Unable to parse version: {rawVersion}");
             }
+        }
+
+        private static string CleanRawVersion(string rawVersion)
+        {
+            if (rawVersion[0].ToString().ToLower() == "v")
+            {
+                rawVersion = rawVersion[1..];
+            }
+
+            return rawVersion;
         }
     }
 }
