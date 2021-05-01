@@ -64,7 +64,7 @@ namespace NVM
             rootCommand.Add(uninstallCommand);
 
             var useCommand = new Command("use") {new Argument("version")};
-            useCommand.Description = "Switch to the specific version. Must be specific like \"14.16.1\".";
+            useCommand.Description = "Switch to a specific version. Must be specific like \"14.16.1\".";
             useCommand.Handler = Container.GetInstance<UseCommand>();
             rootCommand.Add(useCommand);
 
