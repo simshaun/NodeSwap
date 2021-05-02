@@ -29,8 +29,10 @@ Type `nodeswap` in your terminal for help.
 ### Commands:
 
 - `nodeswap` — Provides an overview of commands
+- `nodeswap avail [<min>]` — List the versions available for download. A minimum
+                             version can be specified to reduce the amount of output.
 - `nodeswap install <version>` — The version can be `latest`, a specific version
-                                like `14.16.1`, or a fuzzy version like `14.16` or `14`.
+                                 like `14.16.1`, or a fuzzy version like `14.16` or `14`.
 - `nodeswap uninstall <version>` — The version must be specific like `14.16.1`.
 - `nodeswap use <version>` — Switch to a specific version. Must be specific like `14.16.1`.
 

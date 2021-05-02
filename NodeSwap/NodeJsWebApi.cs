@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
@@ -39,6 +40,28 @@ namespace NodeSwap
             }
 
             throw new ArgumentException($"NodeJS distribution not found for given prefix: {prefix}");
+        }
+
+        /// <summary>
+        /// Get the versions of Node that may be installed.
+        /// </summary>
+        public List<Version> GetInstallableNodeVersions(string min = "")
+        {
+            var minVersion = VersionParser.Parse(min != "" ? min : "0.0.0");
+
+            var versions = new List<Version>();
+            var reader = NodeVersionsStreamReader();
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                var lineVersion = VersionParser.Parse(line.Split("\t")[0]);
+                if (lineVersion >= minVersion)
+                {
+                    versions.Add(lineVersion);
+                }
+            }
+
+            return versions;
         }
 
         /// <summary>

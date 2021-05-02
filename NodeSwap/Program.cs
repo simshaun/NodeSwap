@@ -31,6 +31,7 @@ namespace NodeSwap
             Container.RegisterInstance(globalContext);
             Container.RegisterSingleton<NodeJsWebApi>();
             Container.RegisterSingleton<NodeJs>();
+            Container.RegisterSingleton<AvailCommand>();
             Container.RegisterSingleton<ListCommand>();
             Container.RegisterSingleton<InstallCommand>();
             Container.RegisterSingleton<UninstallCommand>();
@@ -51,6 +52,13 @@ namespace NodeSwap
                 Description = "List the Node.js installations."
             };
             rootCommand.Add(listCommand);
+
+            var availMinArg = new Argument("min");
+            availMinArg.SetDefaultValue("");
+            var availCommand = new Command("avail") {availMinArg};
+            availCommand.Description = "List the versions available for download.";
+            availCommand.Handler = Container.GetInstance<AvailCommand>();
+            rootCommand.Add(availCommand);
 
             var installCommand = new Command("install") {new Argument("version")};
             installCommand.Description =
