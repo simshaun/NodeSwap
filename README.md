@@ -1,6 +1,7 @@
 # NodeSwap
 
-NodeSwap is a Windows-based version manager for [Node.js](https://nodejs.org/).
+NodeSwap is a version manager for [Node.js](https://nodejs.org/), similar to NVM.
+Built for Windows.
 
 ## Installing and Updating
 
