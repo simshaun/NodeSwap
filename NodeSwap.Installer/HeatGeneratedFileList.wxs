@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER">
+            <Component Id="cmpE6093123418C9140989BEB29E01FC8B3" Guid="*">
+                <File Id="fil12A92847D547173F60E352D7DAA8CFD8" KeyPath="yes" Source="$(var.HarvestPath)\NodeSwap.deps.json" />
+            </Component>
+            <Component Id="cmpAA28C9BD94D97E79761E37F41937F90A" Guid="*">
+                <File Id="fil445FA4C9A49D4480B7FE74E9F97DD2A2" KeyPath="yes" Source="$(var.HarvestPath)\NodeSwap.dll" />
+            </Component>
+            
+            <Component Id="cmp1297151B99D0FDB882E2365FB5BBF42E" Guid="*">
+                <File Id="filFA926D08CEB680C86288A0DC04BB1247" KeyPath="yes" Source="$(var.HarvestPath)\NodeSwap.pdb" />
+            </Component>
+            <Component Id="cmp3F58635652DCF9CEA45C7B21032133F5" Guid="*">
+                <File Id="fil4C1AA2C4663FB373FC1C6CF7D469B26E" KeyPath="yes" Source="$(var.HarvestPath)\NodeSwap.runtimeconfig.dev.json" />
+            </Component>
+            <Component Id="cmp35E7F23DE48C591500B3C87844D04BD9" Guid="*">
+                <File Id="fil23EBC4A3AC65057D7FEF65BB46BE6EE6" KeyPath="yes" Source="$(var.HarvestPath)\NodeSwap.runtimeconfig.json" />
+            </Component>
+            <Component Id="cmp0FA5C3D29A184482EE7154024853586D" Guid="*">
+                <File Id="fil18D82312CC9B87ED71DFC3516F3AE391" KeyPath="yes" Source="$(var.HarvestPath)\NuGet.Versioning.dll" />
+            </Component>
+            <Component Id="cmpAE759CBF260F049B70B0EE223EFA0765" Guid="*">
+                <File Id="fil5F23CDC218378D705F4566AC8ED71940" KeyPath="yes" Source="$(var.HarvestPath)\ShellProgressBar.dll" />
+            </Component>
+            <Component Id="cmpA8D1BE679C83A89BE1F2D6CD750A800F" Guid="*">
+                <File Id="fil2D993634CF8F43E7DBCE0D0266DE1AD8" KeyPath="yes" Source="$(var.HarvestPath)\SimpleInjector.dll" />
+            </Component>
+            <Component Id="cmp3B9C9B9385920A10BBA478F4EB3B7ACD" Guid="*">
+                <File Id="fil88E781372CFBEE069440964A1F323BF4" KeyPath="yes" Source="$(var.HarvestPath)\System.CommandLine.dll" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="HeatGenerated_comp">
+            <ComponentRef Id="cmpE6093123418C9140989BEB29E01FC8B3" />
+            <ComponentRef Id="cmpAA28C9BD94D97E79761E37F41937F90A" />
+            
+            <ComponentRef Id="cmp1297151B99D0FDB882E2365FB5BBF42E" />
+            <ComponentRef Id="cmp3F58635652DCF9CEA45C7B21032133F5" />
+            <ComponentRef Id="cmp35E7F23DE48C591500B3C87844D04BD9" />
+            <ComponentRef Id="cmp0FA5C3D29A184482EE7154024853586D" />
+            <ComponentRef Id="cmpAE759CBF260F049B70B0EE223EFA0765" />
+            <ComponentRef Id="cmpA8D1BE679C83A89BE1F2D6CD750A800F" />
+            <ComponentRef Id="cmp3B9C9B9385920A10BBA478F4EB3B7ACD" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

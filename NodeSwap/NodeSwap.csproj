@@ -3,10 +3,13 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <PackageId>nodeswap</PackageId>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <PackageId>NodeSwap</PackageId>
         <Title>NodeSwap</Title>
         <Authors>Shaun Simmons &lt;shaun@shaun.pub&gt;</Authors>
         <Description>A Node.js version manager for Windows</Description>
+        <Company>FoxAndFly</Company>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
 
     <ItemGroup>
