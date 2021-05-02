@@ -54,17 +54,17 @@ namespace NVM
 
             var installCommand = new Command("install") {new Argument("version")};
             installCommand.Description =
-                "The version can be \"latest\", a specific version like \"14.16.1\", or a fuzzy version like \"14.16\" or \"14\".";
+                "The version can be `latest`, a specific version like `14.16.1`, or a fuzzy version like `14.16` or `14`.";
             installCommand.Handler = Container.GetInstance<InstallCommand>();
             rootCommand.Add(installCommand);
 
             var uninstallCommand = new Command("uninstall") {new Argument("version")};
-            uninstallCommand.Description = "The version must be specific like \"14.16.1\".";
+            uninstallCommand.Description = "The version must be specific like `14.16.1`.";
             uninstallCommand.Handler = Container.GetInstance<UninstallCommand>();
             rootCommand.Add(uninstallCommand);
 
             var useCommand = new Command("use") {new Argument("version")};
-            useCommand.Description = "Switch to a specific version. Must be specific like \"14.16.1\".";
+            useCommand.Description = "Switch to a specific version. Must be specific like `14.16.1`.";
             useCommand.Handler = Container.GetInstance<UseCommand>();
             rootCommand.Add(useCommand);
 
