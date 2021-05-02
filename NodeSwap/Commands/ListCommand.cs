@@ -17,7 +17,6 @@ namespace NodeSwap.Commands
         public Task<int> InvokeAsync(InvocationContext context)
         {
             var versions = _nodeJs.GetInstalledVersions();
-
             if (versions.Count == 0)
             {
                 Console.WriteLine("None installed");
