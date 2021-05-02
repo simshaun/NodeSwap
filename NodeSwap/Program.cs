@@ -1,10 +1,10 @@
 ﻿using System;
 using System.CommandLine;
 using System.IO;
-using NVM.Commands;
+using NodeSwap.Commands;
 using Container = SimpleInjector.Container;
 
-namespace NVM
+namespace NodeSwap
 {
     internal static class Program
     {

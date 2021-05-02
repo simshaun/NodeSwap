@@ -5,10 +5,11 @@ using System.IO.Compression;
 using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
-using NVM.Utils;
+using NodeSwap;
+using NodeSwap.Utils;
 using ShellProgressBar;
 
-namespace NVM.Commands
+namespace NodeSwap.Commands
 {
     public class InstallCommand : ICommandHandler
     {

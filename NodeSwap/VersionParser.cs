@@ -1,7 +1,7 @@
 using System;
 using NuGet.Versioning;
 
-namespace NVM
+namespace NodeSwap
 {
     public static class VersionParser
     {

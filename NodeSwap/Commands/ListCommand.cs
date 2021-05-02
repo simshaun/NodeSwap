@@ -1,8 +1,9 @@
 using System;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
+using NodeSwap;
 
-namespace NVM.Commands
+namespace NodeSwap.Commands
 {
     public class ListCommand : ICommandHandler
     {

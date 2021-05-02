@@ -4,9 +4,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Threading.Tasks;
+using NodeSwap;
 using ShellProgressBar;
 
-namespace NVM.Commands
+namespace NodeSwap.Commands
 {
     public class UninstallCommand : ICommandHandler
     {

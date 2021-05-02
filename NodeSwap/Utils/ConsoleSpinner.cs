@@ -1,6 +1,6 @@
 using System;
 
-namespace NVM.Utils
+namespace NodeSwap.Utils
 {
     public sealed class ConsoleSpinner
     {

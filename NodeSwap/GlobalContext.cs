@@ -1,4 +1,4 @@
-namespace NVM
+namespace NodeSwap
 {
     public class GlobalContext
     {
