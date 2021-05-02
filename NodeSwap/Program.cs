@@ -16,7 +16,7 @@ namespace NVM
             {
                 ConfigDirPath = Path.Combine(
                     Environment.ExpandEnvironmentVariables(@"%LocalAppData%"),
-                    "faf-nvm"
+                    "NodeSwap"
                 ),
                 NodeDirPath = Path.Combine(
                     Environment.ExpandEnvironmentVariables(@"%ProgramFiles%"),

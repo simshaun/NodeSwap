@@ -3,7 +3,11 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <RootNamespace>NVM</RootNamespace>
+        <RootNamespace>NVMW</RootNamespace>
+        <PackageId>nodeswap</PackageId>
+        <Title>NodeSwap</Title>
+        <Authors>Shaun Simmons &lt;shaun@shaun.pub&gt;</Authors>
+        <Description>A Node.js version manager for Windows</Description>
     </PropertyGroup>
 
     <ItemGroup>
