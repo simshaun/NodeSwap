@@ -4,9 +4,9 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0-windows</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <FileVersion>1.0.4</FileVersion>
-        <AssemblyVersion>1.0.4</AssemblyVersion>
-        <PackageVersion>1.0.4</PackageVersion>
+        <FileVersion>1.1.0</FileVersion>
+        <AssemblyVersion>1.1.0</AssemblyVersion>
+        <PackageVersion>1.1.0</PackageVersion>
         <!-- Single file app – https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file -->
         <PublishSingleFile>true</PublishSingleFile>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
