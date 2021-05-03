@@ -28,6 +28,7 @@ Download and run the latest installer from the [Releases][2] page.
 
 Type `nodeswap` in your terminal for help.
 
+
 ### Commands:
 
 - `nodeswap` — Provides an overview of commands
@@ -38,14 +39,26 @@ Type `nodeswap` in your terminal for help.
 - `nodeswap uninstall <version>` — The version must be specific like `14.16.1`.
 - `nodeswap use <version>` — Switch to a specific version. Must be specific like `14.16.1`.
 
+
 ## Caveats
 
 - This software is in early stages. There are some features missing such as
   the ability to swap between 32-bit and 64-bit Node.js versions.
 
+  
+## How-to
+
+### Change where NodeSwap stores Node.js installations:
+NodeSwap utilizes an environment var named `NODESWAP_STORAGE`. Simply update it
+with a new path. 
+
+> Be sure the path actually exists. NodeSwap does not create it for you.
+
+
 ## Issues & Feature Requests
 
 - Please report in the [Issue Tracker](https://github.com/FoxAndFly/NodeSwap/issues).
+
 
 ## License
 
