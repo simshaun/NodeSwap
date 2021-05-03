@@ -9,4 +9,10 @@
   <String Id="Comments">Installs NodeSwap</String>
 
   <String Id="NewerInstalled">The same or a newer version of this product is already installed.</String>
+  <String Id="StorageDirDlgTitle">{\WixUI_Font_Title}Storage Folder</String>
+  <String Id="StorageDirDlgDescription">Click Next to use the default folder or click Change to choose another.</String>
+  <String Id="StorageDirDlgFolderLabel">Store Node.js versions in:</String>
+  <String Id="StorageDirDlgChange">Change</String>
+  <String Id="StorageDirDlgDisclaimer1">NOTE: If you change this to a directory outside of the install</String>
+  <String Id="StorageDirDlgDisclaimer2">directory, it will not be removed if you uninstall NodeSwap.</String>
 </WixLocalization>

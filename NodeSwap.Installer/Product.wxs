@@ -35,8 +35,9 @@
 
     <!-- Offer option to change installation directory -->
     <!-- This requires WixUIExtension.dll to be added as a reference in the project. -->
-    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="MyWixUI_InstallDir" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="WIXUI_STORAGEDIR" Value="STORAGEFOLDER" />
 
     <!-- Upgrade logic -->
     <!-- AllowSameVersionUpgrades -> Always upgrade, never allow two versions to be installed next to each other -->
@@ -55,7 +56,7 @@
 
         <!-- All folders from here on are relative to their parent. -->
 
-        <Directory Id="ProgramFilesI6" Name="!(loc.ManufacturerName)">
+        <Directory Id="ProgramFilesFAF" Name="!(loc.ManufacturerName)">
 
           <!-- INSTALLFOLDER is a property name. Needed for WixUI_InstallDir -->
           <Directory Id="INSTALLFOLDER" Name="!(loc.ApplicationName)">
@@ -81,17 +82,44 @@
             <Component Id="NodeSwap.exe_comp" Guid="*">
               <File Source="$(var.HarvestPath)\NodeSwap.exe" Id="NodeSwapExe" KeyPath="yes" />
             </Component>
+            
+            <!-- STORAGEFOLDER is a property that's needed by WixUI_InstallDir. -->
+            <Directory Id="STORAGEFOLDER" Name="var">
+              <Component Id="STORAGEFOLDER_comp" Guid="911C0AA6-A8DB-49D2-94E1-6BBFA77D92AD">
+                <CreateFolder />
+              </Component>
+              
+              <!-- Create a `NODESWAP_STORAGE` ENV var. --> 
+              <Component Id="SETENV_NODESWAP_comp" Guid="BBDA8C31-0309-4854-AA11-CCE0BDFE8B17" KeyPath="yes">
+                <Environment
+                    Id="ENV_NODESWAP_STORAGE"
+                    Name="NODESWAP_STORAGE"
+                    Value="[STORAGEFOLDER]"
+                    Permanent="no"
+                    Part="last"
+                    Action="set"
+                    System="no" />
+              </Component>
+            </Directory>
 
-            <!-- Add to PATH -->
-            <Component Id="SETENV_comp" Guid="39D20980-F0DD-4720-B80B-CF4CF37C59B6" KeyPath="yes">
+            <!-- Add installation folder and symlink folder to PATH environment var -->
+            <Component Id="SETENV_PATH_comp" Guid="39D20980-F0DD-4720-B80B-CF4CF37C59B6" KeyPath="yes">
               <Environment
-                  Id="PATH"
+                  Id="ENV_PATH_INSTALLFOLDER"
                   Name="PATH"
                   Value="[INSTALLFOLDER]"
                   Permanent="no"
                   Part="last"
                   Action="set"
                   System="yes" />
+              <Environment
+                  Id="ENV_PATH_SYMLINK"
+                  Name="PATH"
+                  Value="[STORAGEFOLDER]\current"
+                  Permanent="no"
+                  Part="last"
+                  Action="set"
+                  System="no" />
             </Component>
 
           </Directory>
@@ -103,8 +131,10 @@
     <Feature Id="Complete" Title="!(loc.ApplicationName)" Level="1">
       <ComponentGroupRef Id="HeatGenerated_comp" />
       <ComponentRef Id="INSTALLFOLDER_comp" />
+      <ComponentRef Id="STORAGEFOLDER_comp" />
       <ComponentRef Id="NodeSwap.exe_comp" />
-      <ComponentRef Id="SETENV_comp" />
+      <ComponentRef Id="SETENV_PATH_comp" />
+      <ComponentRef Id="SETENV_NODESWAP_comp" />
     </Feature>
   </Product>
 </Wix>

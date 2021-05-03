@@ -21,22 +21,18 @@
     <SuppressPdbOutput>True</SuppressPdbOutput>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Product.wxs" />
-    <Compile Include="HeatGeneratedFileList.wxs" Condition="Exists('HeatGeneratedFileList.wxs')" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="eula.rtf" />
-    <Content Include="exclude.xsl" />
-    <Content Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="Product_en-us.wxl" />
     <WixExtension Include="WixUIExtension">
       <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
       <Name>WixUIExtension</Name>
     </WixExtension>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Product_en-us.wxl" />
+    <Compile Include="Dialog\StorageDirDlg.wxs" />
+    <Compile Include="MyWixUI_InstallDir.wxs" />
+    <Compile Include="Product.wxs" />
+    <Compile Include="HeatGeneratedFileList.wxs" Condition="Exists('HeatGeneratedFileList.wxs')" />
+    <Content Include="eula.rtf" />
+    <Content Include="exclude.xsl" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />

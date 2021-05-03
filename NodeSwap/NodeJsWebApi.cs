@@ -73,13 +73,8 @@ namespace NodeSwap
             return $"https://nodejs.org/dist/v{version}/node-v{version}-win-{arch}.zip";
         }
 
-        private StreamReader NodeVersionsStreamReader()
+        protected virtual Stream NodeVersionsStream()
         {
-            if (_nodeVersionsStreamReader != null)
-            {
-                return _nodeVersionsStreamReader;
-            }
-
             Stream stream;
             try
             {
@@ -96,7 +91,17 @@ namespace NodeSwap
                 throw new Exception("Unable to connect to nodejs.org !");
             }
 
-            var reader = new StreamReader(stream);
+            return stream;
+        }
+
+        private StreamReader NodeVersionsStreamReader()
+        {
+            if (_nodeVersionsStreamReader != null)
+            {
+                return _nodeVersionsStreamReader;
+            }
+
+            var reader = new StreamReader(NodeVersionsStream());
             reader.ReadLine(); // skip first line;
             _nodeVersionsStreamReader = reader;
 

@@ -22,6 +22,7 @@ namespace NodeSwap
             rawVersion = CleanRawVersion(rawVersion);
             try
             {
+                if (rawVersion.Split(".").Length != 3) throw new ArgumentException();
                 return new Version(rawVersion);
             }
             catch (ArgumentException)
