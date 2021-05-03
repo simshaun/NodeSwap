@@ -10,6 +10,7 @@
     <OutputType>Package</OutputType>
     <CompilerAdditionalOptions></CompilerAdditionalOptions>
     <LinkerAdditionalOptions>-sice:ICE61</LinkerAdditionalOptions>
+    <DefineSolutionProperties>false</DefineSolutionProperties>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
