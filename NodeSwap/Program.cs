@@ -54,7 +54,7 @@ namespace NodeSwap
             rootCommand.Add(listCommand);
 
             var availMinArg = new Argument("min");
-            availMinArg.SetDefaultValue("");
+            availMinArg.SetDefaultValue("0.0.0");
             var availCommand = new Command("avail") {availMinArg};
             availCommand.Description = "List the versions available for download.";
             availCommand.Handler = Container.GetInstance<AvailCommand>();
