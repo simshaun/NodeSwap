@@ -1,7 +1,8 @@
 # NodeSwap
 
-NodeSwap is a version manager for [Node.js](https://nodejs.org/), similar to NVM.
-Built for Windows.
+NodeSwap is a Windows-only version manager for [Node.js][1], similar to NVM.
+
+[1]: https://nodejs.org/
 
 ## Installing and Updating
 
@@ -11,11 +12,12 @@ Built for Windows.
 > - Remove `%AppData%\npm` to prevent global module conflicts.
 
 ### Install NodeSwap
-1. Ensure `C:\Program Files\nodejs` is in your PATH environment variable.
-2. Download and run the latest installer from the Releases page.
+Download and run the latest installer from the [Releases][2] page.
 
 ### Upgrade NodeSwap
-Download and run the latest installer from the Releases page.
+Download and run the latest installer from the [Releases][2] page.
+
+[2]: https://github.com/FoxAndFly/NodeSwap/releases "Releases"
 
 
 ## Usage
