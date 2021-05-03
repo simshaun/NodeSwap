@@ -4,8 +4,8 @@ NodeSwap is a Windows-only version manager for [Node.js][1], similar to NVM.
 
 [1]: https://nodejs.org/
 
-[![NodeSwap command overview](example0.png)]
-[![NodeSwap swapping Node.js versions](example1.png)]
+![NodeSwap command overview](example0.png)
+![NodeSwap swapping Node.js versions](example1.png)
 
 
 ## Installing and Updating
