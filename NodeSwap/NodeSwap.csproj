@@ -2,17 +2,32 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0-windows</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <FileVersion>1.0.4</FileVersion>
+        <AssemblyVersion>1.0.4</AssemblyVersion>
+        <PackageVersion>1.0.4</PackageVersion>
+        <!-- Single file app – https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file -->
+        <PublishSingleFile>true</PublishSingleFile>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+        <PublishTrimmed>false</PublishTrimmed>
+        <SelfContained>false</SelfContained>
+        <!-- Meta -->
         <PackageId>NodeSwap</PackageId>
         <Title>NodeSwap</Title>
         <Authors>Shaun Simmons &lt;shaun@shaun.pub&gt;</Authors>
         <Description>A Node.js version manager for Windows</Description>
         <Company>FoxAndFly</Company>
+        <!-- Prevent dep's language files being dumped in output -->
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-        <FileVersion>1.0.3</FileVersion>
-        <AssemblyVersion>1.0.3</AssemblyVersion>
-        <PackageVersion>1.0.3</PackageVersion>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <!-- No NuGet package -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
     </PropertyGroup>
 
     <ItemGroup>

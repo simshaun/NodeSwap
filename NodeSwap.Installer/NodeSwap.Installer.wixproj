@@ -55,7 +55,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <ReleasePath>..\NodeSwap\bin\Release</ReleasePath>
+    <ReleasePath>..\NodeSwap\bin\Release\win-x64\publish</ReleasePath>
     <DefineConstants>HarvestPath=$(ReleasePath)</DefineConstants>
   </PropertyGroup>
   <Target Name="BeforeBuild">

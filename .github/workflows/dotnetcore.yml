@@ -15,6 +15,7 @@ jobs:
 
     env:
       Project_Directory: NodeSwap
+      Project_Filename: NodeSwap.csproj
       Installer_Directory: NodeSwap.Installer
       Installer_Filename: NodeSwap.Installer.msi
 
@@ -24,7 +25,7 @@ jobs:
       - name: Add dotnet to PATH
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.201
+          dotnet-version: '5.0.x'
 
       # The installer utilizes WiX 3.x, which is not compatible with the dotnet CLI.
       # It uses the older NuGet packages.config file and is built directly with MSBuild.
@@ -48,6 +49,9 @@ jobs:
 
       - name: Test
         run: dotnet test --configuration Release
+
+      - name: Publish
+        run: dotnet publish --configuration Release $env:Project_Directory\$env:Project_Filename
 
       # The installer must be built separately because it is not supported by the dotnet CLI.
       - name: Get installer deps

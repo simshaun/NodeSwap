@@ -6,18 +6,23 @@ NodeSwap is a Windows-only version manager for [Node.js][1], similar to NVM.
 
 ## Installing and Updating
 
-> ### ⚠ Prerequisite: 
-> **Existing Node.js installations:**  
-> - Be sure to uninstall any existing Node.js installations.
-> - Remove `%AppData%\npm` to prevent global module conflicts.
+> ### ⚠ Prerequisites: 
+> - **Minimum of .NET 5.0**
+>   - There's a good chance you already have this on modern Windows.
+>   - If not, download & install at least [.NET 5.0][2].
+> 
+> - **Existing Node.js installations:**  
+>   - Be sure to uninstall any existing Node.js installations.
+>   - Remove `%AppData%\npm` to prevent global module conflicts.
 
 ### Install NodeSwap
-Download and run the latest installer from the [Releases][2] page.
+Download and run the latest installer from the [Releases][3] page.
 
 ### Upgrade NodeSwap
-Download and run the latest installer from the [Releases][2] page.
+Download and run the latest installer from the [Releases][3] page.
 
-[2]: https://github.com/FoxAndFly/NodeSwap/releases "Releases"
+[2]: https://dotnet.microsoft.com/download
+[3]: https://github.com/FoxAndFly/NodeSwap/releases
 
 
 ## Usage
