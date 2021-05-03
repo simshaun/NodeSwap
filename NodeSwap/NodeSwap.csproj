@@ -10,7 +10,9 @@
         <Description>A Node.js version manager for Windows</Description>
         <Company>FoxAndFly</Company>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-        <FileVersion>1.0.2</FileVersion>
+        <FileVersion>1.0.3</FileVersion>
+        <AssemblyVersion>1.0.3</AssemblyVersion>
+        <PackageVersion>1.0.3</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

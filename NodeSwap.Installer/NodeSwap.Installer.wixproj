@@ -9,6 +9,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>NodeSwap.Installer</OutputName>
     <OutputType>Package</OutputType>
+    <CompilerAdditionalOptions></CompilerAdditionalOptions>
+    <LinkerAdditionalOptions>-sice:ICE61</LinkerAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>

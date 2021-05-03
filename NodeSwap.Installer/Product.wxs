@@ -42,8 +42,8 @@
     <!-- Upgrade logic -->
     <!-- AllowSameVersionUpgrades -> Always upgrade, never allow two versions to be installed next to each other -->
     <!-- AllowSameVersionUpgrades causes ICE61 which must be ignored -->
-    <MajorUpgrade DowngradeErrorMessage="!(loc.NewerInstalled)" AllowSameVersionUpgrades="no" />
-
+    <MajorUpgrade DowngradeErrorMessage="!(loc.NewerInstalled)" AllowSameVersionUpgrades="yes" />
+    
     <MediaTemplate EmbedCab="yes" />
 
     <!-- Outermost folder (kind of virtual). Fixed entry. -->
@@ -89,6 +89,8 @@
                 <CreateFolder />
               </Component>
               
+              <Directory Id="SYMLINKFOLDER" Name="current" />
+              
               <!-- Create a `NODESWAP_STORAGE` ENV var. --> 
               <Component Id="SETENV_NODESWAP_comp" Guid="BBDA8C31-0309-4854-AA11-CCE0BDFE8B17" KeyPath="yes">
                 <Environment
@@ -96,14 +98,14 @@
                     Name="NODESWAP_STORAGE"
                     Value="[STORAGEFOLDER]"
                     Permanent="no"
-                    Part="last"
+                    Part="all"
                     Action="set"
                     System="no" />
               </Component>
             </Directory>
 
-            <!-- Add installation folder and symlink folder to PATH environment var -->
-            <Component Id="SETENV_PATH_comp" Guid="39D20980-F0DD-4720-B80B-CF4CF37C59B6" KeyPath="yes">
+            <!-- Add installation folder to PATH environment var -->
+            <Component Id="SETENV_PATH_INSTALLFOLDER_comp" Guid="39D20980-F0DD-4720-B80B-CF4CF37C59B6" KeyPath="yes">
               <Environment
                   Id="ENV_PATH_INSTALLFOLDER"
                   Name="PATH"
@@ -111,11 +113,15 @@
                   Permanent="no"
                   Part="last"
                   Action="set"
-                  System="yes" />
+                  System="no" />
+            </Component>
+
+            <!-- Add symlink folder to PATH environment var -->
+            <Component Id="SETENV_PATH_SYMLINKFOLDER_comp" Guid="90E95031-ADDF-4944-96F3-54CF893C3305" KeyPath="yes">
               <Environment
-                  Id="ENV_PATH_SYMLINK"
+                  Id="ENV_PATH_SYMLINKFOLDER"
                   Name="PATH"
-                  Value="[STORAGEFOLDER]\current"
+                  Value="[SYMLINKFOLDER]"
                   Permanent="no"
                   Part="last"
                   Action="set"
@@ -131,9 +137,10 @@
     <Feature Id="Complete" Title="!(loc.ApplicationName)" Level="1">
       <ComponentGroupRef Id="HeatGenerated_comp" />
       <ComponentRef Id="INSTALLFOLDER_comp" />
-      <ComponentRef Id="STORAGEFOLDER_comp" />
       <ComponentRef Id="NodeSwap.exe_comp" />
-      <ComponentRef Id="SETENV_PATH_comp" />
+      <ComponentRef Id="STORAGEFOLDER_comp" />
+      <ComponentRef Id="SETENV_PATH_INSTALLFOLDER_comp" />
+      <ComponentRef Id="SETENV_PATH_SYMLINKFOLDER_comp" />
       <ComponentRef Id="SETENV_NODESWAP_comp" />
     </Feature>
   </Product>
