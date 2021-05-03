@@ -13,6 +13,5 @@
   <String Id="StorageDirDlgDescription">Click Next to use the default folder or click Change to choose another.</String>
   <String Id="StorageDirDlgFolderLabel">Store Node.js versions in:</String>
   <String Id="StorageDirDlgChange">Change</String>
-  <String Id="StorageDirDlgDisclaimer1">NOTE: If you change this to a directory outside of the install</String>
-  <String Id="StorageDirDlgDisclaimer2">directory, it will not be removed if you uninstall NodeSwap.</String>
+  <String Id="StorageDirDlgDisclaimer">NOTE: This directory will not be removed if you uninstall NodeSwap.</String>
 </WixLocalization>

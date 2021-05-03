@@ -18,8 +18,7 @@
         <Control Id="Folder" Type="PathEdit" X="20" Y="100" Width="320" Height="18" Property="WIXUI_STORAGEDIR" Indirect="yes" />
         <Control Id="ChangeFolder" Type="PushButton" X="20" Y="120" Width="56" Height="17" Text="!(loc.StorageDirDlgChange)" />
         
-        <Control Id="Disclaimer1" Type="Text" X="25" Y="150" Width="280" Height="10" Transparent="yes" NoPrefix="yes" Text="!(loc.StorageDirDlgDisclaimer1)" />
-        <Control Id="Disclaimer2" Type="Text" X="25" Y="160" Width="280" Height="10" Transparent="yes" NoPrefix="yes" Text="!(loc.StorageDirDlgDisclaimer2)" />
+        <Control Id="Disclaimer" Type="Text" X="25" Y="150" Width="280" Height="10" Transparent="yes" NoPrefix="yes" Text="!(loc.StorageDirDlgDisclaimer)" />
       </Dialog>
     </UI>
   </Fragment>
