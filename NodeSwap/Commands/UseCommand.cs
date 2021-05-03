@@ -1,12 +1,8 @@
 using System;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.IO.Compression;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using NodeSwap;
-using ShellProgressBar;
 
 namespace NodeSwap.Commands
 {
@@ -56,25 +52,25 @@ namespace NodeSwap.Commands
             // Replace the symlink
             //
 
-            if (Directory.Exists(_globalContext.NodeDirPath))
+            if (Directory.Exists(_globalContext.SymlinkPath))
             {
                 try
                 {
-                    Directory.Delete(_globalContext.NodeDirPath);
+                    Directory.Delete(_globalContext.SymlinkPath);
                 }
                 catch (IOException)
                 {
                     await Console.Error.WriteLineAsync(
-                        $"Unable to delete the symlink at {_globalContext.NodeDirPath}. Be sure you are running this in an elevated terminal (i.e. Run as Administrator).");
+                        $"Unable to delete the symlink at {_globalContext.SymlinkPath}. Be sure you are running this in an elevated terminal (i.e. Run as Administrator).");
                     return 1;
                 }
             }
 
-            CreateSymbolicLink(_globalContext.NodeDirPath, nodeVersion.Path, SymbolicLink.Directory);
-            if (!Directory.Exists(_globalContext.NodeDirPath))
+            CreateSymbolicLink(_globalContext.SymlinkPath, nodeVersion.Path, SymbolicLink.Directory);
+            if (!Directory.Exists(_globalContext.SymlinkPath))
             {
                 await Console.Error.WriteLineAsync(
-                    $"Unable to create the symlink at {_globalContext.NodeDirPath}. Be sure you are running this in an elevated terminal (i.e. Run as Administrator).");
+                    $"Unable to create the symlink at {_globalContext.SymlinkPath}. Be sure you are running this in an elevated terminal (i.e. Run as Administrator).");
                 return 1;
             }
 

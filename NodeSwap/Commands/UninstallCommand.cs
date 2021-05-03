@@ -55,22 +55,6 @@ namespace NodeSwap.Commands
             // Uninstall it
             //
 
-            if (nodeVersion.IsActive && Directory.Exists(_globalContext.NodeDirPath))
-            {
-                // Remove the symlink
-                try
-                {
-                    Directory.Delete(_globalContext.NodeDirPath);
-                }
-                catch (IOException)
-                {
-                    await Console.Error.WriteLineAsync($"Unable to delete the symlink at {_globalContext.NodeDirPath}");
-                    return 1;
-                }
-            }
-
-
-            // Then delete the version
             try
             {
                 Directory.Delete(nodeVersion.Path, true);

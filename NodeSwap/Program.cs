@@ -8,24 +8,20 @@ namespace NodeSwap
 {
     internal static class Program
     {
+        private const string StorageEnv = "NODESWAP_STORAGE";
         private static readonly Container Container;
 
         static Program()
         {
+            var storageEnv = Environment.ExpandEnvironmentVariables($"%{StorageEnv}%");
             var globalContext = new GlobalContext
             {
-                ConfigDirPath = Path.Combine(
-                    Environment.ExpandEnvironmentVariables(@"%LocalAppData%"),
-                    "NodeSwap"
-                ),
-                NodeDirPath = Path.Combine(
-                    Environment.ExpandEnvironmentVariables(@"%ProgramFiles%"),
-                    "nodejs"
-                ),
+                StoragePath = storageEnv,
+                SymlinkPath = Path.Combine(storageEnv, "current"),
                 Is64Bit = Environment.Is64BitOperatingSystem
             };
 
-            globalContext.ActiveVersionTrackerFilePath = Path.Combine(globalContext.ConfigDirPath, "last-used");
+            globalContext.ActiveVersionTrackerFilePath = Path.Combine(globalContext.StoragePath, "last-used");
 
             Container = new Container();
             Container.RegisterInstance(globalContext);
@@ -42,7 +38,16 @@ namespace NodeSwap
         private static int Main(string[] args)
         {
             var globalContext = Container.GetInstance<GlobalContext>();
-            Directory.CreateDirectory(globalContext.ConfigDirPath);
+            if (Environment.GetEnvironmentVariable(StorageEnv) == null)
+            {
+                Console.Error.WriteLine($"Missing {StorageEnv} ENV var. It should exist and contain a folder path.");
+                return 1;
+            }
+            if (!Directory.Exists(globalContext.StoragePath))
+            {
+                Console.Error.WriteLine($"The directory specified by the {StorageEnv} ENV var does not exist.");
+                return 1;
+            }
 
             var rootCommand = new RootCommand();
 

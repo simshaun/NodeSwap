@@ -21,7 +21,7 @@ namespace NodeSwap
 
             return
                 Directory
-                    .GetDirectories(_globalContext.ConfigDirPath, "node-v*", SearchOption.TopDirectoryOnly)
+                    .GetDirectories(_globalContext.StoragePath, "node-v*", SearchOption.TopDirectoryOnly)
                     .Select(dir =>
                     {
                         var version = VersionParser.Parse(Regex.Match(dir, @"node-v(\d+\.\d+\.\d+)").Groups[1].Value);
