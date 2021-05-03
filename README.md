@@ -41,6 +41,7 @@ Type `nodeswap` in your terminal for help.
 ### Commands:
 
 - `nodeswap` — Provides an overview of commands
+- `nodeswap list` — List the Node.js installations.
 - `nodeswap avail [<min>]` — List the versions available for download. A minimum
                              version can be specified to reduce the amount of output.
 - `nodeswap install <version>` — The version can be `latest`, a specific version
