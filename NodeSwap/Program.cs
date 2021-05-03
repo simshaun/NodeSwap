@@ -46,6 +46,7 @@ namespace NodeSwap
             if (!Directory.Exists(globalContext.StoragePath))
             {
                 Console.Error.WriteLine($"The directory specified by the {StorageEnv} ENV var does not exist.");
+                Console.Error.WriteLine($"{globalContext.StoragePath}");
                 return 1;
             }
 
