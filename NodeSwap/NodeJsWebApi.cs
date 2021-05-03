@@ -80,10 +80,20 @@ namespace NodeSwap
                 return _nodeVersionsStreamReader;
             }
 
-            var stream = new WebClient().OpenRead("https://nodejs.org/dist/index.tab");
+            Stream stream;
+            try
+            {
+                stream = new WebClient().OpenRead("https://nodejs.org/dist/index.tab");
+            }
+            catch (WebException)
+            {
+                throw new Exception("Unable to connect to nodejs.org. Try opening " +
+                                    "https://nodejs.org/dist/index.tab in your browser.");
+            }
+
             if (stream == null)
             {
-                throw new InvalidOperationException("Unable to connect to nodejs.org");
+                throw new Exception("Unable to connect to nodejs.org !");
             }
 
             var reader = new StreamReader(stream);
