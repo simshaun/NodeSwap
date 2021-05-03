@@ -30,6 +30,11 @@
             <Component Id="cmp3B9C9B9385920A10BBA478F4EB3B7ACD" Guid="*">
                 <File Id="fil88E781372CFBEE069440964A1F323BF4" KeyPath="yes" Source="$(var.HarvestPath)\System.CommandLine.dll" />
             </Component>
+            <Directory Id="dirE7B4A6F2DD043E7C7ECBDE7B89C02FF1" Name="ref">
+                <Component Id="cmp3062A13BA0748F72ADD4A62D3E7ACF12" Guid="*">
+                    <File Id="fil6AE7BAEF0E77ADF642B14820D4A45335" KeyPath="yes" Source="$(var.HarvestPath)\ref\NodeSwap.dll" />
+                </Component>
+            </Directory>
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -44,6 +49,7 @@
             <ComponentRef Id="cmpAE759CBF260F049B70B0EE223EFA0765" />
             <ComponentRef Id="cmpA8D1BE679C83A89BE1F2D6CD750A800F" />
             <ComponentRef Id="cmp3B9C9B9385920A10BBA478F4EB3B7ACD" />
+            <ComponentRef Id="cmp3062A13BA0748F72ADD4A62D3E7ACF12" />
         </ComponentGroup>
     </Fragment>
 </Wix>
