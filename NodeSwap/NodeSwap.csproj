@@ -4,9 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0-windows</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <FileVersion>1.1.0</FileVersion>
-        <AssemblyVersion>1.1.0</AssemblyVersion>
-        <PackageVersion>1.1.0</PackageVersion>
+        <Version>1.1.1</Version>
         <!-- Single file app – https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file -->
         <PublishSingleFile>true</PublishSingleFile>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -27,6 +25,10 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <PlatformTarget>AnyCPU</PlatformTarget>
     </PropertyGroup>
 
