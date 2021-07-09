@@ -45,9 +45,9 @@ namespace NodeSwap
         /// <summary>
         /// Get the versions of Node that may be installed.
         /// </summary>
-        public List<Version> GetInstallableNodeVersions(string min = "")
+        public List<Version> GetInstallableNodeVersions(string prefix = "")
         {
-            var minVersion = VersionParser.Parse(min != "" ? min : "0.0.0");
+            var minVersion = VersionParser.Parse(prefix != "" ? prefix : "0.0.0");
 
             var versions = new List<Version>();
             var reader = NodeVersionsStreamReader();
@@ -55,7 +55,7 @@ namespace NodeSwap
             while ((line = reader.ReadLine()) != null)
             {
                 var lineVersion = VersionParser.Parse(line.Split("\t")[0]);
-                if (lineVersion >= minVersion)
+                if (lineVersion >= minVersion && (prefix == "" || lineVersion.ToString().StartsWith(prefix)))
                 {
                     versions.Add(lineVersion);
                 }
@@ -98,6 +98,11 @@ namespace NodeSwap
         {
             if (_nodeVersionsStreamReader != null)
             {
+                // Reset reader to beginning on each access
+                _nodeVersionsStreamReader.DiscardBufferedData();
+                _nodeVersionsStreamReader.BaseStream.Seek(0, SeekOrigin.Begin);
+                _nodeVersionsStreamReader.ReadLine(); // skip first line
+                
                 return _nodeVersionsStreamReader;
             }
 

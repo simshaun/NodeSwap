@@ -43,6 +43,7 @@ namespace NodeSwap
                 Console.Error.WriteLine($"Missing {StorageEnv} ENV var. It should exist and contain a folder path.");
                 return 1;
             }
+
             if (!Directory.Exists(globalContext.StoragePath))
             {
                 Console.Error.WriteLine($"The directory specified by the {StorageEnv} ENV var does not exist.");
@@ -59,10 +60,11 @@ namespace NodeSwap
             };
             rootCommand.Add(listCommand);
 
-            var availMinArg = new Argument("min");
-            availMinArg.SetDefaultValue("0.0.0");
-            var availCommand = new Command("avail") {availMinArg};
-            availCommand.Description = "List the versions available for download.";
+            var availPrefixArg = new Argument("prefix");
+            availPrefixArg.SetDefaultValue("");
+            var availCommand = new Command("avail") {availPrefixArg};
+            availCommand.Description =
+                "List versions available for download. Prefix can be specific like `14.16.1`, or fuzzy like `14.16` or `14`.";
             availCommand.Handler = Container.GetInstance<AvailCommand>();
             rootCommand.Add(availCommand);
 

@@ -18,11 +18,11 @@ namespace NodeSwap.Commands
 
         public Task<int> InvokeAsync(InvocationContext context)
         {
-            var minVersion = context.ParseResult.ValueForArgument("min");
+            var versionPrefix = context.ParseResult.ValueForArgument("prefix");
 
             try
             {
-                var versions = _nodeWeb.GetInstallableNodeVersions(minVersion?.ToString());
+                var versions = _nodeWeb.GetInstallableNodeVersions(versionPrefix?.ToString());
                 if (versions.Count == 0)
                 {
                     Console.WriteLine("None found");
