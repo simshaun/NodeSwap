@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +15,11 @@ namespace NodeSwap
         public NodeJs(GlobalContext globalContext)
         {
             _globalContext = globalContext;
+        }
+
+        public NodeJsVersion? GetLatestInstalledVersion()
+        {
+            return GetInstalledVersions().FirstOrDefault();
         }
 
         public List<NodeJsVersion> GetInstalledVersions()

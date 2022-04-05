@@ -26,26 +26,40 @@ namespace NodeSwap.Commands
                 return 1;
             }
 
-            Version version;
-            try
+            NodeJsVersion nodeVersion;
+            
+            if (rawVersion.ToString() == "latest")
             {
-                version = VersionParser.StrictParse(rawVersion.ToString()!);
+                nodeVersion = _nodeLocal.GetLatestInstalledVersion();
+                if (nodeVersion == null)
+                {
+                    await Console.Error.WriteLineAsync($"There are no versions installed");
+                    return 1;
+                }
             }
-            catch (ArgumentException)
+            else
             {
-                await Console.Error.WriteLineAsync($"Invalid version argument: {rawVersion}");
-                return 1;
-            }
+                Version version;
+                try
+                {
+                    version = VersionParser.StrictParse(rawVersion.ToString()!);
+                }
+                catch (ArgumentException)
+                {
+                    await Console.Error.WriteLineAsync($"Invalid version argument: {rawVersion}");
+                    return 1;
+                }
 
-            //
-            // Is the requested version installed?
-            //
+                //
+                // Is the requested version installed?
+                //
 
-            var nodeVersion = _nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
-            if (nodeVersion == null)
-            {
-                await Console.Error.WriteLineAsync($"{version} not installed");
-                return 1;
+                nodeVersion = _nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
+                if (nodeVersion == null)
+                {
+                    await Console.Error.WriteLineAsync($"{version} not installed");
+                    return 1;
+                }
             }
 
             //
