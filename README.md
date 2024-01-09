@@ -13,7 +13,7 @@ NodeSwap is a Windows-only version manager for [Node.js][1], similar to NVM.
 > ### ⚠ Prerequisites: 
 > - **Minimum of .NET 5.0**
 >   - There's a good chance you already have this on modern Windows.
->   - If not, download & install at least [.NET 5.0][2].
+>   - If not, download & install at least [.NET 8.0][2].
 > 
 > - **Existing Node.js installations:**  
 >   - Be sure to uninstall any existing Node.js installations.
@@ -35,7 +35,7 @@ Download and run the latest installer from the [Releases][3] page.
 > **NodeSwap** needs to be ran in an elevated terminal (i.e. Run as Administrator).  
 > It needs this in order to create symlinks when installing and swapping Node.js versions. 
 
-Type `nodeswap` in your terminal for help.
+Type `nodeswap` in your terminal for help. 
 
 
 ### Commands:
