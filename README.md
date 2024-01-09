@@ -11,7 +11,7 @@ NodeSwap is a Windows-only version manager for [Node.js][1], similar to NVM.
 ## Installing and Updating
 
 > ### ⚠ Prerequisites: 
-> - **Minimum of .NET 5.0**
+> - **Minimum of .NET 8.0**
 >   - There's a good chance you already have this on modern Windows.
 >   - If not, download & install at least [.NET 8.0][2].
 > 
