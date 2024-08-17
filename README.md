@@ -26,7 +26,7 @@ Download and run the latest installer from the [Releases][3] page.
 Download and run the latest installer from the [Releases][3] page.
 
 [2]: https://dotnet.microsoft.com/download
-[3]: https://github.com/FoxAndFly/NodeSwap/releases
+[3]: https://github.com/simshaun/NodeSwap/releases
 
 
 ## Usage
@@ -67,7 +67,7 @@ with a new path.
 
 ## Issues & Feature Requests
 
-- Please report in the [Issue Tracker](https://github.com/FoxAndFly/NodeSwap/issues).
+- Please report in the [Issue Tracker](https://github.com/simshaun/NodeSwap/issues).
 
 
 ## License

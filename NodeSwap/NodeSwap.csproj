@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0-windows</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <Version>1.3.2</Version>
+        <Version>1.3.3</Version>
         <!-- Single file app – https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file -->
         <PublishSingleFile>true</PublishSingleFile>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -16,7 +16,7 @@
         <Title>NodeSwap</Title>
         <Authors>Shaun Simmons &lt;shaun@shaun.pub&gt;</Authors>
         <Description>A Node.js version manager for Windows</Description>
-        <Company>FoxAndFly</Company>
+        <Company>simshaun</Company>
         <!-- Prevent dep's language files being dumped in output -->
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <NeutralLanguage>en-US</NeutralLanguage>
