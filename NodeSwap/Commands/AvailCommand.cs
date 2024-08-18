@@ -6,16 +6,12 @@ using NodeSwap.Utils;
 namespace NodeSwap.Commands;
 
 [CliCommand(
-    Description =
-        "Discover Node.js versions available for download.",
+    Description = "Discover Node.js versions available for download.",
     Parent = typeof(RootCommand)
 )]
 public class AvailCommand(NodeJsWebApi nodeWeb)
 {
-    [CliArgument(
-        Description =
-            "Can be specific like `22.6.0`, or fuzzy like `22.6` or `22`.")
-    ]
+    [CliArgument(Description = "Can be specific like `22.6.0`, or fuzzy like `22.6` or `22`.")]
     public string Prefix { get; set; } = "";
 
     public async Task<int> RunAsync()
