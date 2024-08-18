@@ -1,28 +1,19 @@
 using System;
-using System.Collections.Generic;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
-using NodeSwap;
 using NodeSwap.Utils;
 
 namespace NodeSwap.Commands
 {
-    public class AvailCommand : ICommandHandler
+    public class AvailCommand(NodeJsWebApi nodeWeb) : ICommandHandler
     {
-        private readonly NodeJsWebApi _nodeWeb;
-
-        public AvailCommand(NodeJsWebApi nodeWeb)
-        {
-            _nodeWeb = nodeWeb;
-        }
-
         public Task<int> InvokeAsync(InvocationContext context)
         {
             var versionPrefix = context.ParseResult.ValueForArgument("prefix");
 
             try
             {
-                var versions = _nodeWeb.GetInstallableNodeVersions(versionPrefix?.ToString());
+                var versions = nodeWeb.GetInstallableNodeVersions(versionPrefix?.ToString());
                 if (versions.Count == 0)
                 {
                     Console.WriteLine("None found");

@@ -5,15 +5,8 @@ using System.Net;
 
 namespace NodeSwap
 {
-    public class NodeJsWebApi
+    public class NodeJsWebApi(GlobalContext globalContext)
     {
-        private readonly GlobalContext _globalContext;
-
-        public NodeJsWebApi(GlobalContext _globalContext)
-        {
-            this._globalContext = _globalContext;
-        }
-
         /// <summary>
         /// Get the most recent Node version.
         /// </summary>
@@ -69,7 +62,7 @@ namespace NodeSwap
         /// </summary>
         public string GetDownloadUrl(Version version)
         {
-            var arch = _globalContext.Is64Bit ? "x64" : "x86";
+            var arch = globalContext.Is64Bit ? "x64" : "x86";
             return $"https://nodejs.org/dist/v{version}/node-v{version}-win-{arch}.zip";
         }
 

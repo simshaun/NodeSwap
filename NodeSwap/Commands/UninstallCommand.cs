@@ -1,25 +1,12 @@
 using System;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.IO.Compression;
-using System.Net;
 using System.Threading.Tasks;
-using NodeSwap;
-using ShellProgressBar;
 
 namespace NodeSwap.Commands
 {
-    public class UninstallCommand : ICommandHandler
+    public class UninstallCommand(NodeJs nodeLocal) : ICommandHandler
     {
-        private readonly GlobalContext _globalContext;
-        private readonly NodeJs _nodeLocal;
-
-        public UninstallCommand(GlobalContext globalContext, NodeJs nodeLocal)
-        {
-            _globalContext = globalContext;
-            _nodeLocal = nodeLocal;
-        }
-
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             var rawVersion = context.ParseResult.ValueForArgument("version");
@@ -44,7 +31,7 @@ namespace NodeSwap.Commands
             // Is the requested version installed?
             //
 
-            var nodeVersion = _nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
+            var nodeVersion = nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
             if (nodeVersion == null)
             {
                 await Console.Error.WriteLineAsync($"{version} not installed");

@@ -22,7 +22,7 @@ namespace NodeSwap
             rawVersion = CleanRawVersion(rawVersion);
             try
             {
-                if (rawVersion.Split(".").Length != 3) throw new ArgumentException();
+                if (rawVersion.Split(".").Length != 3) throw new ArgumentException("Invalid version. Expected x.x.x");
                 return new Version(rawVersion);
             }
             catch (ArgumentException)
@@ -33,7 +33,7 @@ namespace NodeSwap
 
         private static string CleanRawVersion(string rawVersion)
         {
-            if (rawVersion[0].ToString().ToLower() == "v")
+            if (rawVersion[0].ToString().Equals("v", StringComparison.CurrentCultureIgnoreCase))
             {
                 rawVersion = rawVersion[1..];
             }

@@ -8,15 +8,8 @@ using System.Text.RegularExpressions;
 
 namespace NodeSwap
 {
-    public class NodeJs
+    public class NodeJs(GlobalContext globalContext)
     {
-        private readonly GlobalContext _globalContext;
-
-        public NodeJs(GlobalContext globalContext)
-        {
-            _globalContext = globalContext;
-        }
-
         public NodeJsVersion? GetLatestInstalledVersion()
         {
             return GetInstalledVersions().FirstOrDefault();
@@ -28,7 +21,7 @@ namespace NodeSwap
 
             return
                 Directory
-                    .GetDirectories(_globalContext.StoragePath, "node-v*", SearchOption.TopDirectoryOnly)
+                    .GetDirectories(globalContext.StoragePath, "node-v*", SearchOption.TopDirectoryOnly)
                     .Select(dir =>
                     {
                         var version = VersionParser.Parse(Regex.Match(dir, @"node-v(\d+\.\d+\.\d+)").Groups[1].Value);
@@ -47,7 +40,7 @@ namespace NodeSwap
         {
             try
             {
-                var str = File.ReadAllText(_globalContext.ActiveVersionTrackerFilePath);
+                var str = File.ReadAllText(globalContext.ActiveVersionTrackerFilePath);
                 return VersionParser.Parse(str);
             }
             catch (FileNotFoundException)

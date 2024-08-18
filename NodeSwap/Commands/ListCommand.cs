@@ -5,18 +5,11 @@ using NodeSwap;
 
 namespace NodeSwap.Commands
 {
-    public class ListCommand : ICommandHandler
+    public class ListCommand(NodeJs nodeJs) : ICommandHandler
     {
-        private readonly NodeJs _nodeJs;
-
-        public ListCommand(NodeJs nodeJs)
-        {
-            _nodeJs = nodeJs;
-        }
-
         public Task<int> InvokeAsync(InvocationContext context)
         {
-            var versions = _nodeJs.GetInstalledVersions();
+            var versions = nodeJs.GetInstalledVersions();
             if (versions.Count == 0)
             {
                 Console.WriteLine("None installed");

@@ -5,25 +5,14 @@ using System.IO.Compression;
 using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
-using NodeSwap;
 using NodeSwap.Utils;
 using ShellProgressBar;
 
 namespace NodeSwap.Commands
 {
-    public class InstallCommand : ICommandHandler
+    public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, NodeJs nodeLocal)
+        : ICommandHandler
     {
-        private readonly GlobalContext _globalContext;
-        private readonly NodeJsWebApi _nodeWeb;
-        private readonly NodeJs _nodeLocal;
-
-        public InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, NodeJs nodeLocal)
-        {
-            _globalContext = globalContext;
-            _nodeWeb = nodeWeb;
-            _nodeLocal = nodeLocal;
-        }
-
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             var rawVersion = context.ParseResult.ValueForArgument("version");
@@ -38,7 +27,7 @@ namespace NodeSwap.Commands
             {
                 try
                 {
-                    version = _nodeWeb.GetLatestNodeVersion();
+                    version = nodeWeb.GetLatestNodeVersion();
                 }
                 catch (Exception)
                 {
@@ -50,7 +39,7 @@ namespace NodeSwap.Commands
             {
                 try
                 {
-                    version = _nodeWeb.GetLatestNodeVersion(rawVersion.ToString());
+                    version = nodeWeb.GetLatestNodeVersion(rawVersion.ToString());
                 }
                 catch (Exception)
                 {
@@ -76,7 +65,7 @@ namespace NodeSwap.Commands
             // Is the requested version already installed?
             //
 
-            if (_nodeLocal.GetInstalledVersions().FindIndex(v => v.Version.Equals(version)) != -1)
+            if (nodeLocal.GetInstalledVersions().FindIndex(v => v.Version.Equals(version)) != -1)
             {
                 await Console.Error.WriteLineAsync($"{version} already installed");
                 return 1;
@@ -86,8 +75,8 @@ namespace NodeSwap.Commands
             // Download it
             //
 
-            var downloadUrl = _nodeWeb.GetDownloadUrl(version);
-            var zipPath = Path.Join(_globalContext.StoragePath, Path.GetFileName(downloadUrl));
+            var downloadUrl = nodeWeb.GetDownloadUrl(version);
+            var zipPath = Path.Join(globalContext.StoragePath, Path.GetFileName(downloadUrl));
             var progressBar = new ProgressBar(100, "Download progress", new ProgressBarOptions
             {
                 ProgressCharacter = '\u2593',
@@ -118,7 +107,7 @@ namespace NodeSwap.Commands
             var timer = new Timer(250);
             timer.Elapsed += (s, e) => ConsoleSpinner.Instance.Update();
             timer.Enabled = true;
-            ZipFile.ExtractToDirectory(zipPath, _globalContext.StoragePath);
+            ZipFile.ExtractToDirectory(zipPath, globalContext.StoragePath);
             timer.Enabled = false;
             ConsoleSpinner.Reset();
             File.Delete(zipPath);
