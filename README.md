@@ -29,11 +29,7 @@ Download and run the latest installer from the [Releases][3] page.
 [3]: https://github.com/simshaun/NodeSwap/releases
 
 
-## Usage
-
-> ### ⚠ Admin rights: 
-> **NodeSwap** needs to be ran in an elevated terminal (i.e. Run as Administrator).  
-> It needs this in order to create symlinks when installing and swapping Node.js versions. 
+## Usage 
 
 Type `nodeswap` in your terminal for help. 
 
@@ -48,6 +44,12 @@ Type `nodeswap` in your terminal for help.
                                  like `22.6.0`, or a fuzzy version like `22.6` or `22`.
 - `nodeswap uninstall <version>` — The version must be specific like `22.6.0`.
 - `nodeswap use <version>` — Switch to a specific version. Must be specific like `22.6.0`.
+
+> ### ⚠ Admin privileges:
+> NodeSwap uses a symlink to point your CLI to the active Node.js version.
+> On Windows, creating symlinks requires admin privileges.
+> When swapping Node.js versions, the `use` command will prompt for administrator
+> access if your terminal isn't already elevated.
 
   
 ## How-to

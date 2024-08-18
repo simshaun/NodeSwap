@@ -1,6 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using DotMake.CommandLine;
 
 namespace NodeSwap.Commands;
@@ -58,6 +61,13 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
             }
         }
 
+        if (!IsAdministrator())
+        {
+            // Restart the application with elevated privileges
+            ElevateApplication();
+            return 1;
+        }
+
         //
         // Replace the symlink
         //
@@ -94,6 +104,38 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
         return 0;
     }
 
+    private static bool IsAdministrator()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        var principal = new WindowsPrincipal(identity);
+        return principal.IsInRole(WindowsBuiltInRole.Administrator);
+    }
+
+    private static void ElevateApplication()
+    {
+        var currentProcessModule = Process.GetCurrentProcess().MainModule;
+        if (currentProcessModule == null) throw new Exception("Unable to get the current process module");
+
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = currentProcessModule.FileName,
+                UseShellExecute = true,
+                Verb = "runas", // Forces the application to run with elevated permissions
+                Arguments = string.Join(" ", Environment.GetCommandLineArgs().Skip(1)),
+            },
+        };
+
+        try
+        {
+            process.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("Could not restart as Administrator: " + ex.Message);
+        }
+    }
 
     [DllImport("kernel32.dll")]
     private static extern bool CreateSymbolicLink(
