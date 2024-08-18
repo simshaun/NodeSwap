@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace NodeSwap;
 
@@ -10,20 +11,20 @@ public class NodeJsWebApi(GlobalContext globalContext)
     /// <summary>
     /// Get the most recent Node version.
     /// </summary>
-    public Version GetLatestNodeVersion()
+    public async Task<Version> GetLatestNodeVersion()
     {
-        return VersionParser.Parse(NodeVersionsStreamReader().ReadLine()?.Split("\t")[0]);
+        var nodeVersionStream = await NodeVersionsStreamReader();
+        return VersionParser.Parse((await nodeVersionStream.ReadLineAsync())?.Split("\t")[0]);
     }
 
     /// <summary>
     /// Get the latest Node version matching a given prefix.
     /// </summary>
     /// <exception cref="ArgumentException"></exception>
-    public Version GetLatestNodeVersion(string prefix)
+    public async Task<Version> GetLatestNodeVersion(string prefix)
     {
-        var reader = NodeVersionsStreamReader();
-        string line;
-        while ((line = reader.ReadLine()) != null)
+        var reader = await NodeVersionsStreamReader();
+        while (await reader.ReadLineAsync() is { } line)
         {
             var lineVersion = VersionParser.Parse(line.Split("\t")[0]);
             if (lineVersion.ToString().StartsWith(prefix))
@@ -38,14 +39,13 @@ public class NodeJsWebApi(GlobalContext globalContext)
     /// <summary>
     /// Get the versions of Node that may be installed.
     /// </summary>
-    public List<Version> GetInstallableNodeVersions(string prefix = "")
+    public async Task<List<Version>> GetInstallableNodeVersions(string prefix = "")
     {
         var minVersion = VersionParser.Parse(prefix != "" ? prefix : "0.0.0");
 
         var versions = new List<Version>();
-        var reader = NodeVersionsStreamReader();
-        string line;
-        while ((line = reader.ReadLine()) != null)
+        var reader = await NodeVersionsStreamReader();
+        while (await reader.ReadLineAsync() is { } line)
         {
             var lineVersion = VersionParser.Parse(line.Split("\t")[0]);
             if (lineVersion >= minVersion && (prefix == "" || lineVersion.ToString().StartsWith(prefix)))
@@ -66,41 +66,36 @@ public class NodeJsWebApi(GlobalContext globalContext)
         return $"https://nodejs.org/dist/v{version}/node-v{version}-win-{arch}.zip";
     }
 
-    protected virtual Stream NodeVersionsStream()
+    protected virtual async Task<Stream> NodeVersionsStream()
     {
-        Stream stream;
+        using var client = new HttpClient();
         try
         {
-            stream = new WebClient().OpenRead("https://nodejs.org/dist/index.tab");
+            var response = await client.GetAsync("https://nodejs.org/dist/index.tab");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStreamAsync();
         }
-        catch (WebException)
+        catch (HttpRequestException ex)
         {
             throw new Exception("Unable to connect to nodejs.org. Try opening " +
-                                "https://nodejs.org/dist/index.tab in your browser.");
+                                "https://nodejs.org/dist/index.tab in your browser.", ex);
         }
-
-        if (stream == null)
-        {
-            throw new Exception("Unable to connect to nodejs.org !");
-        }
-
-        return stream;
     }
 
-    private StreamReader NodeVersionsStreamReader()
+    private async Task<StreamReader> NodeVersionsStreamReader()
     {
         if (_nodeVersionsStreamReader != null)
         {
             // Reset reader to beginning on each access
             _nodeVersionsStreamReader.DiscardBufferedData();
             _nodeVersionsStreamReader.BaseStream.Seek(0, SeekOrigin.Begin);
-            _nodeVersionsStreamReader.ReadLine(); // skip first line
-                
+            await _nodeVersionsStreamReader.ReadLineAsync(); // skip first line
+
             return _nodeVersionsStreamReader;
         }
 
-        var reader = new StreamReader(NodeVersionsStream());
-        reader.ReadLine(); // skip first line;
+        var reader = new StreamReader(await NodeVersionsStream());
+        await reader.ReadLineAsync(); // skip first line;
         _nodeVersionsStreamReader = reader;
 
         return _nodeVersionsStreamReader;
