@@ -14,7 +14,7 @@
         <!-- Meta -->
         <PackageId>NodeSwap</PackageId>
         <Title>NodeSwap</Title>
-        <Authors>Shaun Simmons &lt;shaun@shaun.pub&gt;</Authors>
+        <Authors>Shaun Simmons &lt;gh@simshaun.com&gt;</Authors>
         <Description>A Node.js version manager for Windows</Description>
         <Company>simshaun</Company>
         <!-- Prevent dep's language files being dumped in output -->
