@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NodeSwap.Utils;
 
-public class ConsoleColumns
+public static class ConsoleColumns
 {
     public static void WriteColumns<T>(List<T> data, int numColumns, Func<T, string> formatValue)
     {
