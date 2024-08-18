@@ -18,7 +18,7 @@ internal static class Program
         {
             StoragePath = storageEnv,
             SymlinkPath = Path.Combine(storageEnv, "current"),
-            Is64Bit = Environment.Is64BitOperatingSystem
+            Is64Bit = Environment.Is64BitOperatingSystem,
         };
 
         globalContext.ActiveVersionTrackerFilePath = Path.Combine(globalContext.StoragePath, "last-used");
@@ -56,7 +56,7 @@ internal static class Program
         var listCommand = new Command("list")
         {
             Handler = Container.GetInstance<ListCommand>(),
-            Description = "List the Node.js installations."
+            Description = "List the Node.js installations.",
         };
         rootCommand.Add(listCommand);
 

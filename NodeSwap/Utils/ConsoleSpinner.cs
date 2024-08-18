@@ -5,11 +5,11 @@ namespace NodeSwap.Utils;
 public sealed class ConsoleSpinner
 {
     public static ConsoleSpinner Instance => _lazy.Value;
-    private static Lazy<ConsoleSpinner> _lazy = new Lazy<ConsoleSpinner>(() => new ConsoleSpinner());
+    private static Lazy<ConsoleSpinner> _lazy = new(() => new ConsoleSpinner());
 
     private readonly int _consoleX;
     private readonly int _consoleY;
-    private readonly char[] _frames = {'|', '/', '-', '\\'};
+    private readonly char[] _frames = ['|', '/', '-', '\\'];
     private int _current;
 
     private ConsoleSpinner()

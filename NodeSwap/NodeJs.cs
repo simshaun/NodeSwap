@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace NodeSwap;
 
-public class NodeJs(GlobalContext globalContext)
+public partial class NodeJs(GlobalContext globalContext)
 {
     public NodeJsVersion? GetLatestInstalledVersion()
     {
@@ -24,12 +24,12 @@ public class NodeJs(GlobalContext globalContext)
                 .GetDirectories(globalContext.StoragePath, "node-v*", SearchOption.TopDirectoryOnly)
                 .Select(dir =>
                 {
-                    var version = VersionParser.Parse(Regex.Match(dir, @"node-v(\d+\.\d+\.\d+)").Groups[1].Value);
+                    var version = VersionParser.Parse(NodeVersionRegex().Match(dir).Groups[1].Value);
                     return new NodeJsVersion
                     {
                         Path = dir,
                         Version = version,
-                        IsActive = version.Equals(activeVersion)
+                        IsActive = version.Equals(activeVersion),
                     };
                 })
                 .OrderByDescending(v => v.Version)
@@ -38,21 +38,17 @@ public class NodeJs(GlobalContext globalContext)
 
     private Version GetActiveVersion()
     {
-        try
-        {
-            var str = File.ReadAllText(globalContext.ActiveVersionTrackerFilePath);
-            return VersionParser.Parse(str);
-        }
-        catch (FileNotFoundException)
-        {
-            return null;
-        }
+        var str = File.ReadAllText(globalContext.ActiveVersionTrackerFilePath);
+        return VersionParser.Parse(str);
     }
+
+    [GeneratedRegex(@"node-v(\d+\.\d+\.\d+)")]
+    private static partial Regex NodeVersionRegex();
 }
 
 public class NodeJsVersion
 {
-    public string Path;
-    public Version Version;
+    public required string Path;
+    public required Version Version;
     public bool IsActive;
 }
