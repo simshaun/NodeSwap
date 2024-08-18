@@ -1,15 +1,16 @@
 ﻿using System;
-using System.CommandLine;
 using System.IO;
+using System.Threading.Tasks;
+using DotMake.CommandLine;
+using Microsoft.Extensions.DependencyInjection;
 using NodeSwap.Commands;
-using Container = SimpleInjector.Container;
 
 namespace NodeSwap;
 
 internal static class Program
 {
     private const string StorageEnv = "NODESWAP_STORAGE";
-    private static readonly Container Container;
+    private static readonly IServiceProvider ServiceProvider;
 
     static Program()
     {
@@ -22,22 +23,19 @@ internal static class Program
         };
 
         globalContext.ActiveVersionTrackerFilePath = Path.Combine(globalContext.StoragePath, "last-used");
-
-        Container = new Container();
-        Container.RegisterInstance(globalContext);
-        Container.RegisterSingleton<NodeJsWebApi>();
-        Container.RegisterSingleton<NodeJs>();
-        Container.RegisterSingleton<AvailCommand>();
-        Container.RegisterSingleton<ListCommand>();
-        Container.RegisterSingleton<InstallCommand>();
-        Container.RegisterSingleton<UninstallCommand>();
-        Container.RegisterSingleton<UseCommand>();
-        Container.Verify();
+        
+        var services = new ServiceCollection();
+        services.AddSingleton(globalContext);
+        services.AddSingleton<NodeJsWebApi>();
+        services.AddSingleton<NodeJs>();
+        ServiceProvider = services.BuildServiceProvider();
+        
+        Cli.Ext.SetServiceProvider(ServiceProvider);
     }
 
-    private static int Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
-        var globalContext = Container.GetInstance<GlobalContext>();
+        var globalContext = ServiceProvider.GetRequiredService<GlobalContext>();
         if (Environment.GetEnvironmentVariable(StorageEnv) == null)
         {
             Console.Error.WriteLine($"Missing {StorageEnv} ENV var. It should exist and contain a folder path.");
@@ -51,39 +49,6 @@ internal static class Program
             return 1;
         }
 
-        var rootCommand = new RootCommand();
-
-        var listCommand = new Command("list")
-        {
-            Handler = Container.GetInstance<ListCommand>(),
-            Description = "List the Node.js installations.",
-        };
-        rootCommand.Add(listCommand);
-
-        var availPrefixArg = new Argument("prefix");
-        availPrefixArg.SetDefaultValue("");
-        var availCommand = new Command("avail") {availPrefixArg};
-        availCommand.Description =
-            "List versions available for download. Prefix can be specific like `14.16.1`, or fuzzy like `14.16` or `14`.";
-        availCommand.Handler = Container.GetInstance<AvailCommand>();
-        rootCommand.Add(availCommand);
-
-        var installCommand = new Command("install") {new Argument("version")};
-        installCommand.Description =
-            "The version can be `latest`, a specific version like `14.16.1`, or a fuzzy version like `14.16` or `14`.";
-        installCommand.Handler = Container.GetInstance<InstallCommand>();
-        rootCommand.Add(installCommand);
-
-        var uninstallCommand = new Command("uninstall") {new Argument("version")};
-        uninstallCommand.Description = "The version must be specific like `14.16.1`.";
-        uninstallCommand.Handler = Container.GetInstance<UninstallCommand>();
-        rootCommand.Add(uninstallCommand);
-
-        var useCommand = new Command("use") {new Argument("version")};
-        useCommand.Description = "Switch to a specific version. May be `latest` or specific like `14.16.1`.";
-        useCommand.Handler = Container.GetInstance<UseCommand>();
-        rootCommand.Add(useCommand);
-
-        return rootCommand.InvokeAsync(args).Result;
+        return await Cli.RunAsync<RootCommand>(args);
     }
 }

@@ -1,23 +1,32 @@
 using System;
-using System.CommandLine.Invocation;
 using System.Threading.Tasks;
+using DotMake.CommandLine;
 using NodeSwap.Utils;
 
 namespace NodeSwap.Commands;
 
-public class AvailCommand(NodeJsWebApi nodeWeb) : ICommandHandler
+[CliCommand(
+    Description =
+        "Discover Node.js versions available for download.",
+    Parent = typeof(RootCommand)
+)]
+public class AvailCommand(NodeJsWebApi nodeWeb)
 {
-    public Task<int> InvokeAsync(InvocationContext context)
-    {
-        var versionPrefix = context.ParseResult.ValueForArgument("prefix");
+    [CliArgument(
+        Description =
+            "Can be specific like `22.6.0`, or fuzzy like `22.6` or `22`.")
+    ]
+    public string Prefix { get; set; } = "";
 
+    public async Task<int> RunAsync()
+    {
         try
         {
-            var versions = nodeWeb.GetInstallableNodeVersions(versionPrefix?.ToString());
+            var versions = await nodeWeb.GetInstallableNodeVersions(Prefix);
             if (versions.Count == 0)
             {
                 Console.WriteLine("None found");
-                return Task.Factory.StartNew(() => 1);
+                return 1;
             }
 
             var consoleWidth = Console.WindowWidth;
@@ -29,13 +38,13 @@ public class AvailCommand(NodeJsWebApi nodeWeb) : ICommandHandler
                 (v) => v.ToString().PadLeft(consoleWidth / numColumns, ' ')
             );
             Console.WriteLine();
-
-            return Task.Factory.StartNew(() => 0);
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine(e.Message);
-            return Task.Factory.StartNew(() => 1);
+            await Console.Error.WriteLineAsync(e.Message);
+            return 1;
         }
+
+        return 0;
     }
 }

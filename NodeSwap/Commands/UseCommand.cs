@@ -1,30 +1,35 @@
 using System;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using DotMake.CommandLine;
 
 namespace NodeSwap.Commands;
 
-public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal) : ICommandHandler
+[CliCommand(
+    Description = "Switch to an installed version of Node.js.",
+    Parent = typeof(RootCommand)
+)]
+public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
 {
-    public async Task<int> InvokeAsync(InvocationContext context)
+    [CliArgument(Description = "`latest` or specific e.g. `22.6.0`. Run `list` command to see installed versions.")]
+    public string Version { get; set; }
+
+    public int Run()
     {
-        var rawVersion = context.ParseResult.ValueForArgument("version");
-        if (rawVersion == null)
+        if (Version == null)
         {
-            await Console.Error.WriteLineAsync("Missing version argument");
+            Console.Error.WriteLine("Missing version argument");
             return 1;
         }
 
         NodeJsVersion nodeVersion;
 
-        if (rawVersion.ToString() == "latest")
+        if (Version == "latest")
         {
             nodeVersion = nodeLocal.GetLatestInstalledVersion();
             if (nodeVersion == null)
             {
-                await Console.Error.WriteLineAsync("There are no versions installed");
+                Console.Error.WriteLine("There are no versions installed");
                 return 1;
             }
         }
@@ -33,11 +38,11 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal) : IComman
             Version version;
             try
             {
-                version = VersionParser.StrictParse(rawVersion.ToString()!);
+                version = VersionParser.StrictParse(Version);
             }
             catch (ArgumentException)
             {
-                await Console.Error.WriteLineAsync($"Invalid version argument: {rawVersion}");
+                Console.Error.WriteLine($"Invalid version argument: {Version}");
                 return 1;
             }
 
@@ -48,7 +53,7 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal) : IComman
             nodeVersion = nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
             if (nodeVersion == null)
             {
-                await Console.Error.WriteLineAsync($"{version} not installed");
+                Console.Error.WriteLine($"{version} not installed");
                 return 1;
             }
         }
@@ -65,7 +70,7 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal) : IComman
             }
             catch (IOException)
             {
-                await Console.Error.WriteLineAsync(
+                Console.Error.WriteLine(
                     $"Unable to delete the symlink at {globalContext.SymlinkPath}. Be sure you are running this in an elevated terminal (i.e. Run as Administrator).");
                 return 1;
             }
@@ -74,7 +79,7 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal) : IComman
         CreateSymbolicLink(globalContext.SymlinkPath, nodeVersion.Path, SymbolicLink.Directory);
         if (!Directory.Exists(globalContext.SymlinkPath))
         {
-            await Console.Error.WriteLineAsync(
+            Console.Error.WriteLine(
                 $"Unable to create the symlink at {globalContext.SymlinkPath}. Be sure you are running this in an elevated terminal (i.e. Run as Administrator).");
             return 1;
         }

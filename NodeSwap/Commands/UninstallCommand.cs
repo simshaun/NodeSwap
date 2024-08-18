@@ -1,29 +1,34 @@
 using System;
-using System.CommandLine.Invocation;
 using System.IO;
-using System.Threading.Tasks;
+using DotMake.CommandLine;
 
 namespace NodeSwap.Commands;
 
-public class UninstallCommand(NodeJs nodeLocal) : ICommandHandler
+[CliCommand(
+    Description = "Uninstall a specific version of Node.js",
+    Parent = typeof(RootCommand)
+)]
+public class UninstallCommand(NodeJs nodeLocal)
 {
-    public async Task<int> InvokeAsync(InvocationContext context)
+    [CliArgument(Description = "e.g. `22.6.0`. Run `list` command to see installed versions.")]
+    public string Version { get; set; }
+
+    public int Run()
     {
-        var rawVersion = context.ParseResult.ValueForArgument("version");
-        if (rawVersion == null)
+        if (Version == null)
         {
-            await Console.Error.WriteLineAsync($"Missing version argument");
+            Console.Error.WriteLine("Missing version argument");
             return 1;
         }
 
         Version version;
         try
         {
-            version = VersionParser.StrictParse(rawVersion.ToString()!);
+            version = VersionParser.StrictParse(Version);
         }
         catch (ArgumentException)
         {
-            await Console.Error.WriteLineAsync($"Invalid version argument: {rawVersion}");
+            Console.Error.WriteLine($"Invalid version argument: {Version}");
             return 1;
         }
 
@@ -34,7 +39,7 @@ public class UninstallCommand(NodeJs nodeLocal) : ICommandHandler
         var nodeVersion = nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
         if (nodeVersion == null)
         {
-            await Console.Error.WriteLineAsync($"{version} not installed");
+            Console.Error.WriteLine($"{version} not installed");
             return 1;
         }
 
@@ -48,7 +53,7 @@ public class UninstallCommand(NodeJs nodeLocal) : ICommandHandler
         }
         catch (IOException)
         {
-            await Console.Error.WriteLineAsync($"Unable to delete {nodeVersion.Path}");
+            Console.Error.WriteLine($"Unable to delete {nodeVersion.Path}");
             return 1;
         }
 
