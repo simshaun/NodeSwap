@@ -64,8 +64,7 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
         if (!IsAdministrator())
         {
             // Restart the application with elevated privileges
-            ElevateApplication();
-            return 1;
+            return ElevateApplication();
         }
 
         //
@@ -111,7 +110,7 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    private static void ElevateApplication()
+    private static int ElevateApplication()
     {
         var currentProcessModule = Process.GetCurrentProcess().MainModule;
         if (currentProcessModule == null) throw new Exception("Unable to get the current process module");
@@ -130,10 +129,13 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
         try
         {
             process.Start();
+            process.WaitForExit();
+            return process.ExitCode;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine("Could not restart as Administrator: " + ex.Message);
+            return 1;
         }
     }
 
