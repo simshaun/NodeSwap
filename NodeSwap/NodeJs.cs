@@ -29,16 +29,32 @@ public partial class NodeJs(GlobalContext globalContext)
                     {
                         Path = dir,
                         Version = version,
-                        IsActive = version.Equals(activeVersion),
+                        IsActive = activeVersion != null && version.Equals(activeVersion),
                     };
                 })
                 .OrderByDescending(v => v.Version)
                 .ToList();
     }
 
-    private Version GetActiveVersion()
+    public Version? GetActiveVersion()
     {
+        if (!File.Exists(globalContext.ActiveVersionTrackerFilePath))
+        {
+            return null;
+        }
+
         var str = File.ReadAllText(globalContext.ActiveVersionTrackerFilePath);
+        return VersionParser.Parse(str);
+    }
+
+    public Version? GetPreviousVersion()
+    {
+        if (!File.Exists(globalContext.PreviousVersionTrackerFilePath))
+        {
+            return null;
+        }
+
+        var str = File.ReadAllText(globalContext.PreviousVersionTrackerFilePath);
         return VersionParser.Parse(str);
     }
 

@@ -1,10 +1,8 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using DotMake.CommandLine;
+using NodeSwap.Utils;
 
 namespace NodeSwap.Commands;
 
@@ -61,10 +59,20 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
             }
         }
 
-        if (!IsAdministrator())
+        if (!ProcessElevation.IsAdministrator())
         {
             // Restart the application with elevated privileges
-            return ElevateApplication();
+            return ProcessElevation.ElevateApplication();
+        }
+        
+        //
+        // Track the previous NodeJS version used
+        //
+
+        var activeVersion = nodeLocal.GetActiveVersion();
+        if (activeVersion != null)
+        {
+            File.WriteAllText(globalContext.PreviousVersionTrackerFilePath, activeVersion.ToString());
         }
 
         //
@@ -101,42 +109,6 @@ public class UseCommand(GlobalContext globalContext, NodeJs nodeLocal)
         File.WriteAllText(globalContext.ActiveVersionTrackerFilePath, nodeVersion.Version.ToString());
         Console.WriteLine("Done");
         return 0;
-    }
-
-    private static bool IsAdministrator()
-    {
-        using var identity = WindowsIdentity.GetCurrent();
-        var principal = new WindowsPrincipal(identity);
-        return principal.IsInRole(WindowsBuiltInRole.Administrator);
-    }
-
-    private static int ElevateApplication()
-    {
-        var currentProcessModule = Process.GetCurrentProcess().MainModule;
-        if (currentProcessModule == null) throw new Exception("Unable to get the current process module");
-
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = currentProcessModule.FileName,
-                UseShellExecute = true,
-                Verb = "runas", // Forces the application to run with elevated permissions
-                Arguments = string.Join(" ", Environment.GetCommandLineArgs().Skip(1)),
-            },
-        };
-
-        try
-        {
-            process.Start();
-            process.WaitForExit();
-            return process.ExitCode;
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine("Could not restart as Administrator: " + ex.Message);
-            return 1;
-        }
     }
 
     [DllImport("kernel32.dll")]

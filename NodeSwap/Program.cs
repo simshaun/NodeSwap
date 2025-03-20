@@ -23,6 +23,7 @@ internal static class Program
         };
 
         globalContext.ActiveVersionTrackerFilePath = Path.Combine(globalContext.StoragePath, "last-used");
+        globalContext.PreviousVersionTrackerFilePath = Path.Combine(globalContext.StoragePath, "previous-used");
         
         var services = new ServiceCollection();
         services.AddSingleton(globalContext);

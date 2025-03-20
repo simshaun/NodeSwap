@@ -5,5 +5,6 @@ public class GlobalContext
     public string StoragePath;
     public string SymlinkPath;
     public string ActiveVersionTrackerFilePath;
+    public string PreviousVersionTrackerFilePath;
     public bool Is64Bit;
 }
