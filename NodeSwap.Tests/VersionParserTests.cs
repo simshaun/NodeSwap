@@ -32,9 +32,9 @@ public class VersionParserTests
     [TestMethod]
     public void Parse_ShouldThrowExceptionOnInvalidInput()
     {
-        Assert.ThrowsException<ArgumentException>(() => VersionParser.Parse("a"));
-        Assert.ThrowsException<ArgumentException>(() => VersionParser.Parse("1.a"));
-        Assert.ThrowsException<ArgumentException>(() => VersionParser.Parse("1.2.a"));
+        Assert.ThrowsException<FormatException>(() => VersionParser.Parse("a"));
+        Assert.ThrowsException<FormatException>(() => VersionParser.Parse("1.a"));
+        Assert.ThrowsException<FormatException>(() => VersionParser.Parse("1.2.a"));
     }
 
     [TestMethod]
