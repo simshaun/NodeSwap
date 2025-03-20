@@ -18,6 +18,8 @@ public class PrevCommand(GlobalContext globalContext, NodeJs nodeLocal)
             Console.Error.WriteLine("No previous version found");
             return 1;
         }
+        
+        Console.WriteLine($"Swapping to {prevVersion}");
 
         if (!ProcessElevation.IsAdministrator())
         {
