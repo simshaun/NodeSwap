@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using DotMake.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using NodeSwap.Commands;
+using NodeSwap.Interfaces;
+using NodeSwap.Services;
 
 namespace NodeSwap;
 
@@ -29,6 +31,14 @@ internal static class Program
         services.AddSingleton(globalContext);
         services.AddSingleton<NodeJsWebApi>();
         services.AddSingleton<NodeJs>();
+        
+        // Register interfaces with implementations
+        services.AddSingleton<IProcessElevation, ProcessElevationService>();
+        services.AddSingleton<IConsoleWriter, ConsoleWriterService>();
+        services.AddSingleton<IFileSystem, FileSystemService>();
+        services.AddSingleton<INodeJsWebApi, NodeJsWebApiService>();
+        services.AddSingleton<INodeJs, NodeJsService>();
+        
         ServiceProvider = services.BuildServiceProvider();
         
         Cli.Ext.SetServiceProvider(ServiceProvider);

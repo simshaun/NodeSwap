@@ -3,8 +3,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Timers;
 using DotMake.CommandLine;
+using NodeSwap.Interfaces;
 using NodeSwap.Utils;
 using ShellProgressBar;
 
@@ -14,7 +14,12 @@ namespace NodeSwap.Commands;
     Description = "Install a version of Node.js",
     Parent = typeof(RootCommand)
 )]
-public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, NodeJs nodeLocal)
+public class InstallCommand(
+    GlobalContext globalContext,
+    INodeJsWebApi nodeWeb,
+    INodeJs nodeLocal,
+    IConsoleWriter console,
+    IFileSystem fileSystem)
 {
     [CliArgument(Description = "`latest`, specific e.g. `22.6.0`, or fuzzy e.g. `22.6` or `22`.")]
     public string Version { get; set; }
@@ -24,10 +29,10 @@ public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, N
 
     public async Task<int> RunAsync()
     {
-        // Retrieve and validate version argument
+        // Validate input
         if (string.IsNullOrEmpty(Version))
         {
-            await Console.Error.WriteLineAsync("Missing version argument");
+            console.WriteErrorLine("Missing version argument");
             return 1;
         }
 
@@ -35,25 +40,22 @@ public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, N
         var version = await GetVersion(Version);
         if (version == null) return 1;
 
-        // Check if the requested version is already installed
+        // Check if already installed
         if (!Force && IsVersionInstalled(version))
         {
-            await Console.Error.WriteLineAsync($"{version} already installed");
+            console.WriteErrorLine($"{version} already installed");
             return 1;
         }
 
-        // Download and install Node.js
+        // Download and install
         var downloadUrl = nodeWeb.GetDownloadUrl(version);
         var zipPath = Path.Join(globalContext.StoragePath, Path.GetFileName(downloadUrl));
-        var downloadResult = await DownloadNodeJs(downloadUrl, zipPath);
 
+        var downloadResult = await DownloadNodeJs(downloadUrl, zipPath);
         if (!downloadResult) return 1;
 
-        // Extract the downloaded file
         ExtractNodeJs(zipPath);
-
-        // Completion message
-        Console.WriteLine($"Done. To use, run `nodeswap use {version}`");
+        console.WriteLine($"Done. To use, run `nodeswap use {version}`");
         return 0;
     }
 
@@ -71,7 +73,7 @@ public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, N
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync($"Error determining version: {ex.Message}");
+            console.WriteErrorLine($"Error determining version: {ex.Message}");
             return null;
         }
     }
@@ -120,21 +122,24 @@ public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, N
         }
         catch (Exception e)
         {
-            await Console.Error.WriteLineAsync("Unable to download the Node.js zip file.");
-            if (e.InnerException == null) return false;
-            await Console.Error.WriteLineAsync(e.InnerException.Message);
-            await Console.Error.WriteLineAsync(
-                "You may need to run this command from an elevated prompt. (Run as Administrator)");
+            console.WriteErrorLine("Unable to download the Node.js zip file.");
+            if (e.InnerException != null)
+            {
+                console.WriteErrorLine(e.InnerException.Message);
+                console.WriteErrorLine(
+                    "You may need to run this command from an elevated prompt. (Run as Administrator)");
+            }
+
             return false;
         }
     }
 
     private void ExtractNodeJs(string zipPath)
     {
-        Console.WriteLine("Extracting...");
+        console.WriteLine("Extracting...");
         ConsoleSpinner.Instance.Update();
 
-        var timer = new Timer(250);
+        var timer = new System.Timers.Timer(250);
         timer.Elapsed += (_, _) => ConsoleSpinner.Instance.Update();
         timer.Start();
 
@@ -142,6 +147,6 @@ public class InstallCommand(GlobalContext globalContext, NodeJsWebApi nodeWeb, N
 
         timer.Stop();
         ConsoleSpinner.Reset();
-        File.Delete(zipPath);
+        fileSystem.DeleteFile(zipPath);
     }
 }

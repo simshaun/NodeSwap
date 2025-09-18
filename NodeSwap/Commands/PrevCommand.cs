@@ -1,6 +1,6 @@
 using System;
 using DotMake.CommandLine;
-using NodeSwap.Utils;
+using NodeSwap.Interfaces;
 
 namespace NodeSwap.Commands;
 
@@ -8,26 +8,31 @@ namespace NodeSwap.Commands;
     Description = "Switch to the previously installed version of Node.js.",
     Parent = typeof(RootCommand)
 )]
-public class PrevCommand(GlobalContext globalContext, NodeJs nodeLocal)
+public class PrevCommand(
+    GlobalContext globalContext, 
+    INodeJs nodeLocal,
+    IProcessElevation processElevation,
+    IConsoleWriter console,
+    IFileSystem fileSystem)
 {
     public int Run()
     {
         var prevVersion = nodeLocal.GetPreviousVersion();
         if (prevVersion == null)
         {
-            Console.Error.WriteLine("No previous version found");
+            console.WriteErrorLine("No previous version found");
             return 1;
         }
         
-        Console.WriteLine($"Swapping to {prevVersion}");
+        console.WriteLine($"Swapping to {prevVersion}");
 
-        if (!ProcessElevation.IsAdministrator())
+        if (!processElevation.IsAdministrator())
         {
-            // Restart the application with elevated privileges
-            return ProcessElevation.ElevateApplication();
+            return processElevation.ElevateApplication();
         }
         
-        var useCommand = new UseCommand(globalContext, nodeLocal)
+        // Create a UseCommand with all required dependencies and execute it
+        var useCommand = new UseCommand(globalContext, nodeLocal, processElevation, console, fileSystem)
         {
             Version = prevVersion.ToString(),
         };
