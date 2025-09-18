@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using DotMake.CommandLine;
 using NodeSwap.Interfaces;
 
@@ -9,21 +10,20 @@ namespace NodeSwap.Commands;
     Parent = typeof(RootCommand)
 )]
 public class UseCommand(
-    GlobalContext globalContext, 
-    INodeJs nodeLocal, 
+    GlobalContext globalContext,
+    INodeJs nodeLocal,
     IProcessElevation processElevation,
     IConsoleWriter console,
     IFileSystem fileSystem)
 {
-    [CliArgument(Description = "`latest` or specific e.g. `22.6.0`. Run `list` command to see installed versions.")]
+    [CliArgument(
+        Description = "`latest` or specific e.g. `22.6.0`. Run `list` command to see installed versions.",
+        Required = false
+    )]
     public string Version { get; set; }
 
     public int Run()
     {
-        // Validate input
-        var validationResult = ValidateInput();
-        if (validationResult != null) return validationResult.Value;
-
         // Find the version to use
         var nodeVersion = ResolveNodeVersion();
         if (nodeVersion == null) return 1;
@@ -38,18 +38,42 @@ public class UseCommand(
         return SwitchToVersion(nodeVersion);
     }
 
-    private int? ValidateInput()
-    {
-        if (Version == null)
-        {
-            console.WriteErrorLine("Missing version argument");
-            return 1;
-        }
-        return null;
-    }
-
     private NodeJsVersion ResolveNodeVersion()
     {
+        // If no version specified, try to read from .nodeswap file
+        if (Version == null)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var nodeSwapFilePath = Path.Combine(currentDirectory, ".nodeswap");
+
+            if (fileSystem.FileExists(nodeSwapFilePath))
+            {
+                try
+                {
+                    var versionText = fileSystem.ReadAllText(nodeSwapFilePath).Trim();
+                    if (string.IsNullOrWhiteSpace(versionText))
+                    {
+                        console.WriteErrorLine("The .nodeswap file is empty");
+                        return null;
+                    }
+
+                    console.WriteLine($"Using Node.js version from .nodeswap: {versionText}");
+                    Version = versionText;
+                }
+                catch (Exception ex)
+                {
+                    console.WriteErrorLine($"Error reading .nodeswap: {ex.Message}");
+                    return null;
+                }
+            }
+            else
+            {
+                console.WriteErrorLine(
+                    "Missing version argument. Either provide a version or create a .nodeswap file.");
+                return null;
+            }
+        }
+
         if (Version == "latest")
         {
             var latestVersion = nodeLocal.GetLatestInstalledVersion();
@@ -58,6 +82,7 @@ public class UseCommand(
                 console.WriteErrorLine("There are no versions installed");
                 return null;
             }
+
             return latestVersion;
         }
 
@@ -70,6 +95,7 @@ public class UseCommand(
                 console.WriteErrorLine($"{version} not installed");
                 return null;
             }
+
             return nodeVersion;
         }
         catch (ArgumentException)
@@ -81,8 +107,15 @@ public class UseCommand(
 
     private int SwitchToVersion(NodeJsVersion nodeVersion)
     {
-        // Track the previous version
+        // Check if we're already using this version
         var activeVersion = nodeLocal.GetActiveVersion();
+        if (activeVersion != null && activeVersion.Equals(nodeVersion.Version))
+        {
+            console.WriteLine($"Already using Node.js version {nodeVersion.Version}");
+            return 0;
+        }
+
+        // Track the previous version only if switching to a new version
         if (activeVersion != null)
         {
             fileSystem.WriteAllText(globalContext.PreviousVersionTrackerFilePath, activeVersion.ToString());

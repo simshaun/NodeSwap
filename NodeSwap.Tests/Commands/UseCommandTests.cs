@@ -50,8 +50,10 @@ public class UseCommandTests
     }
 
     [TestMethod]
-    public void Run_WhenVersionIsNull_ShouldReturnError()
+    public void Run_WhenVersionIsNull_AndNoNodeSwapFile_ShouldReturnError()
     {
+        _mockFileSystem.FileExists(Arg.Any<string>()).Returns(false);
+
         var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = null,
@@ -60,7 +62,69 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(1);
-        _mockConsoleWriter.Received(1).WriteErrorLine("Missing version argument");
+        _mockConsoleWriter.Received(1).WriteErrorLine("Missing version argument. Either provide a version or create a .nodeswap file.");
+    }
+
+    [TestMethod]
+    public void Run_WhenVersionIsNull_AndNodeSwapFileExists_ShouldUseVersionFromFile()
+    {
+        var version = new Version(18, 17, 0);
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
+        };
+
+        _mockFileSystem.FileExists(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns(true);
+        _mockFileSystem.ReadAllText(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns("18.17.0");
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.CreateSymbolicLink(Arg.Any<string>(), Arg.Any<string>(), true).Returns(true);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = null,
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(0);
+        _mockConsoleWriter.Received(1).WriteLine("Using Node.js version from .nodeswap: 18.17.0");
+        _mockConsoleWriter.Received(1).WriteLine("Done");
+    }
+
+    [TestMethod]
+    public void Run_WhenVersionIsNull_AndNodeSwapFileIsEmpty_ShouldReturnError()
+    {
+        _mockFileSystem.FileExists(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns(true);
+        _mockFileSystem.ReadAllText(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns("   ");
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = null,
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(1);
+        _mockConsoleWriter.Received(1).WriteErrorLine("The .nodeswap file is empty");
+    }
+
+    [TestMethod]
+    public void Run_WhenVersionIsNull_AndNodeSwapFileReadFails_ShouldReturnError()
+    {
+        _mockFileSystem.FileExists(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns(true);
+        _mockFileSystem.When(x => x.ReadAllText(Arg.Is<string>(path => path.EndsWith(".nodeswap"))))
+                      .Do(x => throw new IOException("File access denied"));
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = null,
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(1);
+        _mockConsoleWriter.Received(1).WriteErrorLine("Error reading .nodeswap: File access denied");
     }
 
     [TestMethod]
@@ -141,6 +205,7 @@ public class UseCommandTests
             new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
         };
         _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null); // No active version
         _mockProcessElevation.IsAdministrator().Returns(true);
         _mockFileSystem.DirectoryExists(_globalContext.SymlinkPath).Returns(false);
         _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true).Returns(true);
@@ -167,6 +232,7 @@ public class UseCommandTests
             new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
         };
         _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null); // No active version
         _mockProcessElevation.IsAdministrator().Returns(true);
         _mockFileSystem.DirectoryExists(_globalContext.SymlinkPath).Returns(false);
         _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true).Returns(false);
@@ -214,6 +280,7 @@ public class UseCommandTests
             new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
         };
         _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null); // No active version
         _mockProcessElevation.IsAdministrator().Returns(true);
         _mockFileSystem.DirectoryExists(_globalContext.SymlinkPath).Returns(true);
         _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true).Returns(true);
@@ -228,5 +295,34 @@ public class UseCommandTests
         result.ShouldBe(0);
         _mockFileSystem.Received(1).DeleteDirectory(_globalContext.SymlinkPath, true);
         _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true);
+    }
+
+    [TestMethod]
+    public void Run_WhenAlreadyUsingRequestedVersion_ShouldReturnEarlyWithoutChanges()
+    {
+        var version = new Version(18, 17, 0);
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
+        };
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns(version); // Already using this version
+        _mockProcessElevation.IsAdministrator().Returns(true);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = version.ToString(),
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(0);
+        _mockConsoleWriter.Received(1).WriteLine($"Already using Node.js version {version}");
+        
+        // Should not perform any file operations
+        _mockFileSystem.DidNotReceive().WriteAllText(_globalContext.PreviousVersionTrackerFilePath, Arg.Any<string>());
+        _mockFileSystem.DidNotReceive().DeleteDirectory(Arg.Any<string>(), Arg.Any<bool>());
+        _mockFileSystem.DidNotReceive().CreateSymbolicLink(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>());
+        _mockFileSystem.DidNotReceive().WriteAllText(_globalContext.ActiveVersionTrackerFilePath, Arg.Any<string>());
     }
 }
