@@ -5,7 +5,7 @@ using NodeSwap.Interfaces;
 
 namespace NodeSwap.Services;
 
-public class FileSystemService : IFileSystem
+public partial class FileSystemService : IFileSystem
 {
     public bool FileExists(string path) => File.Exists(path);
     
@@ -30,8 +30,9 @@ public class FileSystemService : IFileSystem
         return result;
     }
 
-    [DllImport("kernel32.dll")]
-    private static extern bool CreateSymbolicLinkWin32(
+    [LibraryImport("kernel32.dll", EntryPoint = "CreateSymbolicLink", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool CreateSymbolicLinkWin32(
         string lpSymlinkFileName,
         string lpTargetFileName,
         SymbolicLink dwFlags);
