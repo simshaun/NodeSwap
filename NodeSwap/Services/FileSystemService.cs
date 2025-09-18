@@ -30,7 +30,7 @@ public partial class FileSystemService : IFileSystem
         return result;
     }
 
-    [LibraryImport("kernel32.dll", EntryPoint = "CreateSymbolicLink", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport("kernel32.dll", EntryPoint = "CreateSymbolicLinkW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool CreateSymbolicLinkWin32(
         string lpSymlinkFileName,
