@@ -12,13 +12,13 @@ public class VersionParserTests
     {
         get
         {
-            return new[]
-            {
-                new object[] {"v1", new Version(1, 0, 0)},
-                new object[] {"2", new Version(2, 0, 0)},
-                new object[] {"1.2.3", new Version(1, 2, 3)},
-                new object[] {"1.5", new Version(1, 5, 0)},
-            };
+            return
+            [
+                ["v1", new Version(1, 0, 0)],
+                ["2", new Version(2, 0, 0)],
+                ["1.2.3", new Version(1, 2, 3)],
+                ["1.5", new Version(1, 5, 0)],
+            ];
         }
     }
 

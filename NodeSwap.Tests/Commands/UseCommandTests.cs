@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NodeSwap.Commands;
-using NodeSwap.Tests.TestUtils;
+using NodeSwap.Interfaces;
+using NSubstitute;
 using Shouldly;
 
 namespace NodeSwap.Tests.Commands;
@@ -12,10 +14,10 @@ public class UseCommandTests
 {
     private string _testDirectory;
     private GlobalContext _globalContext;
-    private MockNodeJs _mockNodeJs;
-    private MockProcessElevation _mockProcessElevation;
-    private MockConsoleWriter _mockConsoleWriter;
-    private MockFileSystem _mockFileSystem;
+    private INodeJs _mockNodeJs;
+    private IProcessElevation _mockProcessElevation;
+    private IConsoleWriter _mockConsoleWriter;
+    private IFileSystem _mockFileSystem;
 
     [TestInitialize]
     public void Setup()
@@ -32,10 +34,10 @@ public class UseCommandTests
         };
         Directory.CreateDirectory(_globalContext.StoragePath);
 
-        _mockNodeJs = new MockNodeJs();
-        _mockProcessElevation = new MockProcessElevation();
-        _mockConsoleWriter = new MockConsoleWriter();
-        _mockFileSystem = new MockFileSystem();
+        _mockNodeJs = Substitute.For<INodeJs>();
+        _mockProcessElevation = Substitute.For<IProcessElevation>();
+        _mockConsoleWriter = Substitute.For<IConsoleWriter>();
+        _mockFileSystem = Substitute.For<IFileSystem>();
     }
 
     [TestCleanup]
@@ -50,13 +52,7 @@ public class UseCommandTests
     [TestMethod]
     public void Run_WhenVersionIsNull_ShouldReturnError()
     {
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = null,
         };
@@ -64,19 +60,13 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(1);
-        _mockConsoleWriter.ErrorMessages.ShouldContain("Missing version argument");
+        _mockConsoleWriter.Received(1).WriteErrorLine("Missing version argument");
     }
 
     [TestMethod]
     public void Run_WhenVersionIsInvalid_ShouldReturnError()
     {
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = "invalid.version",
         };
@@ -84,19 +74,15 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(1);
-        _mockConsoleWriter.ErrorMessages.ShouldContain("Invalid version argument: invalid.version");
+        _mockConsoleWriter.Received(1).WriteErrorLine("Invalid version argument: invalid.version");
     }
 
     [TestMethod]
     public void Run_WhenVersionNotInstalled_ShouldReturnError()
     {
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        _mockNodeJs.GetInstalledVersions().Returns([]);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = "99.99.99",
         };
@@ -104,19 +90,15 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(1);
-        _mockConsoleWriter.ErrorMessages.ShouldContain("99.99.99 not installed");
+        _mockConsoleWriter.Received(1).WriteErrorLine("99.99.99 not installed");
     }
 
     [TestMethod]
     public void Run_WhenLatestRequestedButNoneInstalled_ShouldReturnError()
     {
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        _mockNodeJs.GetLatestInstalledVersion().Returns((NodeJsVersion)null);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = "latest",
         };
@@ -124,31 +106,22 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(1);
-        _mockConsoleWriter.ErrorMessages.ShouldContain("There are no versions installed");
+        _mockConsoleWriter.Received(1).WriteErrorLine("There are no versions installed");
     }
 
     [TestMethod]
     public void Run_WhenNotAdministrator_ShouldAttemptElevation()
     {
-        // Setup installed version in mock
         var version = new Version(18, 17, 0);
-        _mockNodeJs.InstalledVersions.Add(new NodeJsVersion
+        var installedVersions = new List<NodeJsVersion>
         {
-            Version = version,
-            Path = $"/fake/path/node-v{version}",
-            IsActive = false,
-        });
+            new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
+        };
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockProcessElevation.IsAdministrator().Returns(false);
+        _mockProcessElevation.ElevateApplication().Returns(42);
 
-        _mockProcessElevation.IsAdministratorReturn = false;
-        _mockProcessElevation.ElevateApplicationReturn = 42;
-
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = version.ToString(),
         };
@@ -156,32 +129,23 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(42);
-        _mockProcessElevation.ElevateApplicationCalled.ShouldBeTrue();
+        _mockProcessElevation.Received(1).ElevateApplication();
     }
 
     [TestMethod]
     public void Run_WhenAdministratorAndVersionInstalled_ShouldSwitchSuccessfully()
     {
-        // Setup installed version in mock
         var version = new Version(18, 17, 0);
-        _mockNodeJs.InstalledVersions.Add(new NodeJsVersion
+        var installedVersions = new List<NodeJsVersion>
         {
-            Version = version,
-            Path = $"/fake/path/node-v{version}",
-            IsActive = false,
-        });
+            new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
+        };
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.DirectoryExists(_globalContext.SymlinkPath).Returns(false);
+        _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true).Returns(true);
 
-        _mockProcessElevation.IsAdministratorReturn = true;
-        _mockFileSystem.DirectoryExistsReturn = false; // No existing symlink
-        _mockFileSystem.CreateSymbolicLinkReturn = true;
-
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = version.ToString(),
         };
@@ -189,41 +153,47 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(0);
-        _mockConsoleWriter.Messages.ShouldContain("Done");
-        _mockFileSystem.CreateSymbolicLinkCalled.ShouldBeTrue();
-        _mockFileSystem.WriteAllTextCalls.ShouldContainKey(_globalContext.ActiveVersionTrackerFilePath);
-        _mockFileSystem.WriteAllTextCalls[_globalContext.ActiveVersionTrackerFilePath].ShouldBe(version.ToString());
+        _mockConsoleWriter.Received(1).WriteLine("Done");
+        _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true);
+        _mockFileSystem.Received(1).WriteAllText(_globalContext.ActiveVersionTrackerFilePath, version.ToString());
+    }
+
+    [TestMethod]
+    public void Run_WhenSymlinkCreationFails_ShouldReturnError()
+    {
+        var version = new Version(18, 17, 0);
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
+        };
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.DirectoryExists(_globalContext.SymlinkPath).Returns(false);
+        _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true).Returns(false);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = version.ToString(),
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(1);
+        _mockConsoleWriter.Received().WriteErrorLine(Arg.Is<string>(msg => msg.Contains("Unable to create the symlink")));
     }
 
     [TestMethod]
     public void Run_WithLatestVersion_ShouldUseLatestInstalled()
     {
-        // Setup multiple installed versions in mock (ordered by version descending)
-        var version1 = new Version(18, 17, 0);
-        var version2 = new Version(20, 11, 0);
-        _mockNodeJs.InstalledVersions.Add(new NodeJsVersion
-        {
-            Version = version2, // Latest version first
-            Path = $"/fake/path/node-v{version2}",
-            IsActive = false,
-        });
-        _mockNodeJs.InstalledVersions.Add(new NodeJsVersion
-        {
-            Version = version1,
-            Path = $"/fake/path/node-v{version1}",
-            IsActive = false,
-        });
+        var version = new Version(20, 11, 0);
+        var latestVersion = new NodeJsVersion { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false };
 
-        _mockProcessElevation.IsAdministratorReturn = true;
-        _mockFileSystem.CreateSymbolicLinkReturn = true;
+        _mockNodeJs.GetLatestInstalledVersion().Returns(latestVersion);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.CreateSymbolicLink(Arg.Any<string>(), Arg.Any<string>(), true).Returns(true);
 
-        var useCommand = new UseCommand(
-            _globalContext,
-            _mockNodeJs,
-            _mockProcessElevation,
-            _mockConsoleWriter,
-            _mockFileSystem
-        )
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
         {
             Version = "latest",
         };
@@ -231,6 +201,32 @@ public class UseCommandTests
         var result = useCommand.Run();
 
         result.ShouldBe(0);
-        _mockConsoleWriter.Messages.ShouldContain("Done");
+        _mockConsoleWriter.Received(1).WriteLine("Done");
+        _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true);
+    }
+
+    [TestMethod]
+    public void Run_WhenExistingSymlinkExists_ShouldDeleteFirst()
+    {
+        var version = new Version(18, 17, 0);
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = version, Path = $"/fake/path/node-v{version}", IsActive = false },
+        };
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.DirectoryExists(_globalContext.SymlinkPath).Returns(true);
+        _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true).Returns(true);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = version.ToString(),
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(0);
+        _mockFileSystem.Received(1).DeleteDirectory(_globalContext.SymlinkPath, true);
+        _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, $"/fake/path/node-v{version}", true);
     }
 }

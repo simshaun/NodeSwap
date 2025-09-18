@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NodeSwap.Commands;
 using NodeSwap.Interfaces;
-using NodeSwap.Tests.TestUtils;
+using NSubstitute;
 using Shouldly;
 
 namespace NodeSwap.Tests.Commands;
@@ -15,8 +15,8 @@ public class AvailCommandTests
 {
     private string _testDirectory;
     private GlobalContext _globalContext;
-    private MockNodeJsWebApi _mockNodeJsWebApi;
-    private MockConsoleWriter _mockConsoleWriter;
+    private INodeJsWebApi _mockNodeJsWebApi;
+    private IConsoleWriter _mockConsoleWriter;
 
     [TestInitialize]
     public void Setup()
@@ -30,8 +30,8 @@ public class AvailCommandTests
         };
         Directory.CreateDirectory(_globalContext.StoragePath);
 
-        _mockNodeJsWebApi = new MockNodeJsWebApi();
-        _mockConsoleWriter = new MockConsoleWriter();
+        _mockNodeJsWebApi = Substitute.For<INodeJsWebApi>();
+        _mockConsoleWriter = Substitute.For<IConsoleWriter>();
     }
 
     [TestCleanup]
@@ -52,13 +52,15 @@ public class AvailCommandTests
             new(18, 17, 0),
             new(16, 14, 0),
         };
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = testVersions;
+        _mockNodeJsWebApi.GetInstallableNodeVersions("").Returns(testVersions);
 
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(0);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("");
+        _mockConsoleWriter.Received(2).WriteLine("");
     }
 
     [TestMethod]
@@ -70,52 +72,59 @@ public class AvailCommandTests
             new(18, 17, 0),
             new(16, 14, 0),
         };
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = testVersions;
+        _mockNodeJsWebApi.GetInstallableNodeVersions(null).Returns(testVersions);
 
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = null };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(0);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions(null);
+        _mockConsoleWriter.Received(2).WriteLine("");
     }
 
     [TestMethod]
     public async Task RunAsync_WhenSpecificPrefix_ShouldCallWithCorrectPrefix()
     {
         var filteredVersions = new List<Version> { new(18, 17, 0), new(18, 16, 0) };
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = filteredVersions;
-        
+        _mockNodeJsWebApi.GetInstallableNodeVersions("18").Returns(filteredVersions);
+
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "18" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(0);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
-        // Note: We can't easily test the prefix parameter without modifying MockNodeJsWebApi
-        // but the command should pass it through correctly
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("18");
+        _mockConsoleWriter.Received(2).WriteLine("");
     }
 
     [TestMethod]
     public async Task RunAsync_WhenNoVersionsFound_ShouldReturnError()
     {
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = [];
-        
+        _mockNodeJsWebApi.GetInstallableNodeVersions("99").Returns(new List<Version>());
+
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "99" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(1);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("99");
+        _mockConsoleWriter.Received(1).WriteLine("None found");
+        _mockConsoleWriter.DidNotReceive().WriteLine("");
     }
 
     [TestMethod]
     public async Task RunAsync_WhenWebApiThrowsException_ShouldReturnError()
     {
-        _mockNodeJsWebApi.ShouldThrowException = true;
-        
+        _mockNodeJsWebApi.GetInstallableNodeVersions("").Returns<List<Version>>(x => throw new Exception("Test exception"));
+
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(1);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("");
+        _mockConsoleWriter.Received(1).WriteErrorLine("Test exception");
     }
 
     [TestMethod]
@@ -127,14 +136,14 @@ public class AvailCommandTests
             new(18, 17, 0),
             new(16, 14, 0),
         };
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = testVersions;
+        _mockNodeJsWebApi.GetInstallableNodeVersions("").Returns(testVersions);
 
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(0);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
-        
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("");
         testVersions.Count.ShouldBeGreaterThan(0);
     }
 
@@ -142,13 +151,15 @@ public class AvailCommandTests
     public async Task RunAsync_WhenExactVersionPrefix_ShouldReturnSuccessfully()
     {
         var singleVersion = new List<Version> { new(18, 17, 0) };
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = singleVersion;
-        
+        _mockNodeJsWebApi.GetInstallableNodeVersions("18.17.0").Returns(singleVersion);
+
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "18.17.0" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(0);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("18.17.0");
+        _mockConsoleWriter.Received(2).WriteLine("");
     }
 
     [TestMethod]
@@ -159,12 +170,14 @@ public class AvailCommandTests
             new(20, 11, 0),
             new(18, 17, 0),
         };
-        _mockNodeJsWebApi.GetInstallableNodeVersionsReturn = testVersions;
+        _mockNodeJsWebApi.GetInstallableNodeVersions("").Returns(testVersions);
 
         var availCommand = new AvailCommand(_mockNodeJsWebApi, _mockConsoleWriter) { Prefix = "" };
+
         var result = await availCommand.RunAsync();
-        
+
         result.ShouldBe(0);
-        _mockNodeJsWebApi.GetInstallableNodeVersionsCalled.ShouldBeTrue();
+        await _mockNodeJsWebApi.Received(1).GetInstallableNodeVersions("");
+        _mockConsoleWriter.Received(2).WriteLine("");
     }
 }

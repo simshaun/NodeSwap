@@ -93,7 +93,7 @@ public class UseCommand(
         {
             try
             {
-                fileSystem.DeleteDirectory(globalContext.SymlinkPath);
+                fileSystem.DeleteDirectory(globalContext.SymlinkPath, true);
             }
             catch (Exception)
             {

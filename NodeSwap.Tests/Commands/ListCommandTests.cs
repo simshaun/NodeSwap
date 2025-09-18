@@ -28,7 +28,6 @@ public class ListCommandTests
         };
         Directory.CreateDirectory(_globalContext.StoragePath);
 
-        // Capture console output
         _consoleOutput = new StringWriter();
         _originalConsoleOut = Console.Out;
         Console.SetOut(_consoleOutput);
@@ -39,7 +38,7 @@ public class ListCommandTests
     {
         Console.SetOut(_originalConsoleOut);
         _consoleOutput?.Dispose();
-        
+
         if (Directory.Exists(_testDirectory))
         {
             Directory.Delete(_testDirectory, true);
@@ -62,11 +61,10 @@ public class ListCommandTests
     {
         var version1 = new Version(20, 11, 0);
         var version2 = new Version(18, 17, 0);
-        
+
         Directory.CreateDirectory(Path.Combine(_globalContext.StoragePath, $"node-v{version1}"));
         Directory.CreateDirectory(Path.Combine(_globalContext.StoragePath, $"node-v{version2}"));
-        
-        // Set one as active
+
         File.WriteAllText(_globalContext.ActiveVersionTrackerFilePath, version2.ToString());
 
         var nodeJs = new NodeJs(_globalContext);
@@ -76,8 +74,8 @@ public class ListCommandTests
         var output = _consoleOutput.ToString();
         output.ShouldContain("20.11.0");
         output.ShouldContain("18.17.0");
-        output.ShouldContain("  * 18.17.0"); // Active version should have asterisk
-        output.ShouldContain("    20.11.0"); // Inactive version should have spaces
+        output.ShouldContain("  * 18.17.0");
+        output.ShouldContain("    20.11.0");
     }
 
     [TestMethod]

@@ -24,7 +24,7 @@ public class UninstallCommandTests
 
         _globalContext = new GlobalContext
         {
-            StoragePath = Path.Combine(_testDirectory, "storage")
+            StoragePath = Path.Combine(_testDirectory, "storage"),
         };
         Directory.CreateDirectory(_globalContext.StoragePath);
 
@@ -120,7 +120,6 @@ public class UninstallCommandTests
         var versionPath = Path.Combine(_globalContext.StoragePath, $"node-v{version}");
         Directory.CreateDirectory(versionPath);
         
-        // Create and keep a file handle open to simulate directory in use
         var testFile = Path.Combine(versionPath, "node.exe");
         using var fileStream = File.Create(testFile);
 

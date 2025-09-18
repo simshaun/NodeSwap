@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DotMake.CommandLine;
 using NodeSwap.Interfaces;
-using NodeSwap.Utils;
 using ShellProgressBar;
 
 namespace NodeSwap.Commands;
@@ -19,7 +18,8 @@ public class InstallCommand(
     INodeJsWebApi nodeWeb,
     INodeJs nodeLocal,
     IConsoleWriter console,
-    IFileSystem fileSystem)
+    IFileSystem fileSystem,
+    IConsoleSpinner consoleSpinner)
 {
     [CliArgument(Description = "`latest`, specific e.g. `22.6.0`, or fuzzy e.g. `22.6` or `22`.")]
     public string Version { get; set; }
@@ -137,16 +137,16 @@ public class InstallCommand(
     private void ExtractNodeJs(string zipPath)
     {
         console.WriteLine("Extracting...");
-        ConsoleSpinner.Instance.Update();
+        consoleSpinner.Update();
 
         var timer = new System.Timers.Timer(250);
-        timer.Elapsed += (_, _) => ConsoleSpinner.Instance.Update();
+        timer.Elapsed += (_, _) => consoleSpinner.Update();
         timer.Start();
 
         ZipFile.ExtractToDirectory(zipPath, globalContext.StoragePath, overwriteFiles: true);
 
         timer.Stop();
-        ConsoleSpinner.Reset();
+        consoleSpinner.Reset();
         fileSystem.DeleteFile(zipPath);
     }
 }
