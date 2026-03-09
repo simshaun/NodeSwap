@@ -43,7 +43,9 @@ Type `nodeswap` in your terminal for help.
 - `nodeswap install <version>` — The version can be `latest`, a specific version
                                  like `22.6.0`, or a fuzzy version like `22.6` or `22`.
 - `nodeswap uninstall <version>` — The version must be specific like `22.6.0`.
-- `nodeswap use <version>` — Switch to a specific version. Must be specific like `22.6.0`.
+- `nodeswap use <version>` — Switch to an installed version. The version can be
+                             `latest`, a specific version like `22.6.0`, or a
+                             fuzzy version like `22.6` or `22`.
 - `nodeswap file` — Use or create a .nodeswap file to manage Node.js version for the current directory.
 
 > ### ⚠ Admin privileges:

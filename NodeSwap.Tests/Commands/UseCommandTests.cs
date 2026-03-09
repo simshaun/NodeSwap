@@ -158,6 +158,109 @@ public class UseCommandTests
     }
 
     [TestMethod]
+    public void Run_WhenPartialMajorVersionRequested_ShouldUseNewestInstalledMatch()
+    {
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = new Version(22, 14, 1), Path = "/fake/path/node-v22.14.1", IsActive = false },
+            new() { Version = new Version(22, 14, 0), Path = "/fake/path/node-v22.14.0", IsActive = false },
+            new() { Version = new Version(20, 16, 0), Path = "/fake/path/node-v20.16.0", IsActive = false },
+        };
+
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, "/fake/path/node-v22.14.1", true).Returns(true);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = "22",
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(0);
+        _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, "/fake/path/node-v22.14.1", true);
+        _mockFileSystem.Received(1).WriteAllText(_globalContext.ActiveVersionTrackerFilePath, "22.14.1");
+    }
+
+    [TestMethod]
+    public void Run_WhenPartialMajorMinorVersionRequested_ShouldUseNewestInstalledPatchMatch()
+    {
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = new Version(22, 14, 2), Path = "/fake/path/node-v22.14.2", IsActive = false },
+            new() { Version = new Version(22, 14, 0), Path = "/fake/path/node-v22.14.0", IsActive = false },
+            new() { Version = new Version(22, 13, 5), Path = "/fake/path/node-v22.13.5", IsActive = false },
+        };
+
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, "/fake/path/node-v22.14.2", true).Returns(true);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = "22.14",
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(0);
+        _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, "/fake/path/node-v22.14.2", true);
+        _mockFileSystem.Received(1).WriteAllText(_globalContext.ActiveVersionTrackerFilePath, "22.14.2");
+    }
+
+    [TestMethod]
+    public void Run_WhenPartialVersionFromNodeSwapFile_ShouldUseNewestInstalledMatch()
+    {
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = new Version(18, 17, 1), Path = "/fake/path/node-v18.17.1", IsActive = false },
+            new() { Version = new Version(18, 17, 0), Path = "/fake/path/node-v18.17.0", IsActive = false },
+        };
+
+        _mockFileSystem.FileExists(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns(true);
+        _mockFileSystem.ReadAllText(Arg.Is<string>(path => path.EndsWith(".nodeswap"))).Returns("18.17");
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+        _mockNodeJs.GetActiveVersion().Returns((Version)null);
+        _mockProcessElevation.IsAdministrator().Returns(true);
+        _mockFileSystem.CreateSymbolicLink(_globalContext.SymlinkPath, "/fake/path/node-v18.17.1", true).Returns(true);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = null,
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(0);
+        _mockConsoleWriter.Received(1).WriteLine("Using Node.js version from .nodeswap: 18.17");
+        _mockFileSystem.Received(1).CreateSymbolicLink(_globalContext.SymlinkPath, "/fake/path/node-v18.17.1", true);
+    }
+
+    [TestMethod]
+    public void Run_WhenPartialVersionNotInstalled_ShouldReturnError()
+    {
+        var installedVersions = new List<NodeJsVersion>
+        {
+            new() { Version = new Version(20, 16, 0), Path = "/fake/path/node-v20.16.0", IsActive = false },
+        };
+
+        _mockNodeJs.GetInstalledVersions().Returns(installedVersions);
+
+        var useCommand = new UseCommand(_globalContext, _mockNodeJs, _mockProcessElevation, _mockConsoleWriter, _mockFileSystem)
+        {
+            Version = "22.14",
+        };
+
+        var result = useCommand.Run();
+
+        result.ShouldBe(1);
+        _mockConsoleWriter.Received(1).WriteErrorLine("22.14 not installed");
+    }
+
+    [TestMethod]
     public void Run_WhenLatestRequestedButNoneInstalled_ShouldReturnError()
     {
         _mockNodeJs.GetLatestInstalledVersion().Returns((NodeJsVersion)null);

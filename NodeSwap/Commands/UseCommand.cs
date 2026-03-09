@@ -17,7 +17,7 @@ public class UseCommand(
     IFileSystem fileSystem)
 {
     [CliArgument(
-        Description = "`latest` or specific e.g. `22.6.0`. Run `list` command to see installed versions.",
+        Description = "`latest`, specific e.g. `22.6.0`, or fuzzy e.g. `22.6` or `22`. Run `list` command to see installed versions.",
         Required = false
     )]
     public string Version { get; set; }
@@ -88,11 +88,13 @@ public class UseCommand(
 
         try
         {
-            var version = VersionParser.StrictParse(Version);
-            var nodeVersion = nodeLocal.GetInstalledVersions().Find(v => v.Version.Equals(version));
+            var versionPrefix = NormalizeVersionPrefix(Version);
+            var nodeVersion = nodeLocal
+                .GetInstalledVersions()
+                .Find(v => v.Version.ToString().StartsWith(versionPrefix, StringComparison.CurrentCulture));
             if (nodeVersion == null)
             {
-                console.WriteErrorLine($"{version} not installed");
+                console.WriteErrorLine($"{versionPrefix} not installed");
                 return null;
             }
 
@@ -103,6 +105,28 @@ public class UseCommand(
             console.WriteErrorLine($"Invalid version argument: {Version}");
             return null;
         }
+    }
+
+    private static string NormalizeVersionPrefix(string rawVersion)
+    {
+        rawVersion = rawVersion.Trim();
+        if (string.IsNullOrWhiteSpace(rawVersion))
+        {
+            throw new ArgumentException("Invalid version argument");
+        }
+
+        try
+        {
+            _ = VersionParser.Parse(rawVersion);
+        }
+        catch (Exception ex) when (ex is ArgumentException or FormatException or IndexOutOfRangeException)
+        {
+            throw new ArgumentException($"Unable to parse version: {rawVersion}", ex);
+        }
+
+        return rawVersion.StartsWith("v", StringComparison.CurrentCultureIgnoreCase)
+            ? rawVersion[1..]
+            : rawVersion;
     }
 
     private int SwitchToVersion(NodeJsVersion nodeVersion)
