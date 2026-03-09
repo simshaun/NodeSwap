@@ -6,6 +6,7 @@ namespace NodeSwap.Commands;
 
 [CliCommand(
     Description = "Switch to the previously installed version of Node.js.",
+    Aliases = ["last"],
     Parent = typeof(RootCommand)
 )]
 public class PrevCommand(
